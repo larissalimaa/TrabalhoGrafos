@@ -1,33 +1,67 @@
 #include <iostream>
 #include <fstream>
+#include <cassert>  // assert
+#define TAM_MAX 100
+
 
 using namespace std;
 
+
+void lerEntrada(int *&n, const string &pathArquivo) {
+
+        string linha, temp;
+
+        cout<< "Arquivo: "<< pathArquivo << endl;
+
+        ifstream arq(pathArquivo);
+
+        assert(arq.is_open());
+        assert(arq.good());
+
+        getline(arq, linha);
+
+        if (!linha.empty()) {
+
+            n = new int[TAM_MAX];
+            n[0] = stoi(linha);
+            int i = 1;
+            while (getline(arq, linha)) {
+                if (!linha.empty()) {
+                    n[i] = stoi(linha);
+                    cout << n[i];
+                    i++;
+                }
+            }
+        }
+        arq.close();
+
+    }
+     
+
+
 int main(int argc, char **argv, char **argp) {
 
-    string linha;
-    int i, result;
+   //LER ARQUIVO ENTRADA
 
-    FILE *arquivo;
-    arquivo = fopen("../io/entrada.txt", "rt");
+   //1 CASO SIMPLES: UM NUMERO POR LINHA, CADA LINHA UM VERTICE
 
-    if (arquivo != NULL)
-    {
-        while (!feof(arquivo)) //enquanto end of file for false continua
-        {
-            result =  fscanf(arquivo, "%d", &i);
-            cout << i << endl;
-        }
-        fclose(arquivo);
-    }
+    int *n = nullptr;  // vetor para armazenar os valores de n (qt. de vertices) lidos de "entrada.txt"
+    //unsigned seed;  // semente de randomização
 
-    else cout << "Unable to open file" << std::endl;
+    const string ARQ_ENTRADA = "io\\entrada.txt";
 
-//    ofstream arquivo;
-//    arquivo.open ("example.txt");
-//    arquivo << "Writing this to a file.\n";
-//    arquivo.close();
+    string ARQUIVO;
 
-    std::cout << "Hello, World!" << std::endl;
+    // obtendo os parâmetros de entrada
+    lerEntrada(n, ARQ_ENTRADA);
+
+
+    // se for passado o nome do arquivo de entrada por parametro
+    if (argc > 1)
+        ARQUIVO = "io/" + (string) argv[1];
+
+    assert(n != nullptr);
+    cout << "Vetor obtido na leitura: " << n[0] << endl;
+
     return 0;
 }
