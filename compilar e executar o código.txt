@@ -1,0 +1,2 @@
+g++ *.c* -o exec.exe
+exec.exe instancias/grafo_9815.txt resultados/resultado.txt

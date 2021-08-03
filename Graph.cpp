@@ -146,7 +146,7 @@ void Graph::insertEdge(int id, int target_id, float weight)
     if (!node->searchEdge(target_id))
     {
         this->number_edges++;
-        
+
         if (this->getDirected())
         {
             node->insertEdge(target_id, weight);
@@ -336,19 +336,19 @@ void Graph::AGMKruskal(ofstream &arquivo_saida)
     //Graph(int order, bool directed, bool weighted_edge, bool weighted_node);
     //Graph *g = new Graph(tam, 0, 1, 0);
 
-    cout << "Entrou no algoritmo"<< endl;
+    cout << "Entrou no algoritmo" << endl;
     //Numero de Arestas
     int numArestas = this->getNumberEdges();
 
-    cout << "numArestas:"<< numArestas <<endl;
+    cout << "numArestas:" << numArestas << endl;
 
     //Numero de Nos
     int V = this->getOrder();
 
-     cout << "Ordem:"<< V <<endl;
+    cout << "Ordem:" << V << endl;
 
     //Criar uma lista L com as arestas
-    cout << "Criou lista arestas"<<endl;
+    cout << "Criou lista arestas" << endl;
     ArestaK *lista_arestas = new ArestaK[numArestas];
 
     // Isso armazenara a AGM resultante
@@ -359,7 +359,7 @@ void Graph::AGMKruskal(ofstream &arquivo_saida)
 
     //Vetor aux com subarvores de um no
     int subarvores[V];
-    cout << "Ponteiros..."<<endl;
+    cout << "Ponteiros..." << endl;
     //Ponteiro para andar entre os nos
     Node *p = this->getFirstNode();
     Edge *a = p->getFirstEdge();
@@ -371,10 +371,10 @@ void Graph::AGMKruskal(ofstream &arquivo_saida)
 
     int contador;
 
-    int i = 1;
+    int i = 0;
 
     //percorre o this induzido preenchendo as informações das arestas
-    cout << "Ira percorrer"<< endl;
+    cout << "Ira percorrer" << endl;
     //percorre nos do this induzido
     for (int j = 0; j < V; j++)
     {
@@ -382,26 +382,29 @@ void Graph::AGMKruskal(ofstream &arquivo_saida)
         while (p != nullptr)
         {
 
-            while(a != nullptr){
-            //verifica se no ja foi visitado
-            if (!verificaNo(lista_arestas, j, a->getTargetId(), i))
+            while (a != nullptr)
             {
-                lista_arestas[i].origem = j;
-                lista_arestas[i].destino = a->getTargetId();
-                lista_arestas[i].peso = a->getWeight();
-                i++;
+                //verifica se no ja foi visitado
+                if (!verificaNo(lista_arestas, j, a->getTargetId(), i))
+                {
+                    lista_arestas[i].origem = j;
+                    lista_arestas[i].destino = a->getTargetId();
+                    lista_arestas[i].peso = a->getWeight();
+                    i++;
+                }
+                a = a->getNextEdge();
             }
-            a = a->getNextEdge();
-            }
+            p = p->getNextNode();
         }
-        p = p->getNextNode();
     }
-    cout << "Saiu while"<< endl;
+    cout << "Saiu while" << endl;
 
     //ordenar em ordem crescente de pesos.
 
     //Algoritmo de quicksorte escolhido
+    cout << "foi no quicksort" << endl;
     quickSort(lista_arestas, 0, numArestas - 1);
+    cout << "saiu do quicksort" << endl;
 
     //vetor com as arestas da solucao
     ArestaK *solucao = new ArestaK[numArestas];
@@ -419,26 +422,40 @@ void Graph::AGMKruskal(ofstream &arquivo_saida)
     {
         arvore[i] = i;
     }
-
     //percorre as arestas adicionando-as no vetor arvore e na solução
-    for (int i = 0; i < numArestas; i++)
+    cout << "percorre as arestas" << endl;
+    int c = 0;
+    cout << "c=" << c << endl;
+    //percorre as arestas adicionando-as no vetor arvore e na solução
+    while (c < numArestas)
     {
-        if (arvore[lista_arestas[i].origem] != arvore[lista_arestas[i].destino])
+        cout << "while arestas" << endl;
+        int u = lista_arestas[c].origem;
+        int v = lista_arestas[c].destino;
+
+        if (arvore[u] != arvore[v])
         {
-            solucao[atual] = lista_arestas[i];
+            solucao[atual] = lista_arestas[c];
             atual++;
             numSolucao++;
-            int verticeAntigo = arvore[lista_arestas[i].origem];
-            int novoVertice = arvore[lista_arestas[i].destino];
+            int verticeantigo = arvore[u];
+            int verticenovo = arvore[v];
             for (int j = 0; j < numArestas; j++)
             {
-                if (arvore[j] == verticeAntigo)
-                    arvore[j] = novoVertice;
+                if (arvore[j] == verticeantigo)
+                {
+                    arvore[j] = verticenovo;
+                }
             }
         }
+        c++;
+        cout << "c=" << c << endl;
     }
 
+    cout << " fim percorre as arestas" << endl;
+
     //Imprime Solução
+    cout << "imprime solucao" << endl;
     unsigned long long int somatorioPesos = 0;
     arquivo_saida << "---------AGM KRUSKAL---------" << endl;
     arquivo_saida << "[No_Origem -- No_Destino] - Peso" << endl;
@@ -465,6 +482,7 @@ void Graph::AGMKruskal(ofstream &arquivo_saida)
     arquivo_saida << "Quantidade de arestas: " << numSolucao << endl;
     arquivo_saida << "--------------------------------------------------------------------------------------------------------" << endl
                   << endl;
+
     delete[] lista_arestas;
     delete[] solucao;
 }
@@ -584,11 +602,10 @@ void agmPrim(int subVertices[], int tam)
             if (graph[u][v] && mstSet[v] == false && graph[u][v] < chaves[v])
                 agm[v] = u, chaves[v] = graph[u][v];
         }
-
     }
 
     //imprime a arvore AGM (armazenado em agm)
-    cout<<"Aresta \tPeso\n";
+    cout << "Aresta \tPeso\n";
     for (int i = 1; i < tam; i++)
-        cout<<agm[i]<<" - "<<i<<" \t"<<graph[i][agm[i]]<<" \n";
+        cout << agm[i] << " - " << i << " \t" << graph[i][agm[i]] << " \n";
 }
