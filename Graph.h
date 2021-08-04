@@ -46,6 +46,7 @@ class Graph{
         void removeNode(int id);
         bool searchNode(int id);
         Node* getNode(int id);
+        void cleanVisited();
 
         //methods phase1
         void topologicalSorting();
@@ -55,7 +56,9 @@ class Graph{
         Graph* agmKuskal();
         Node* arestaMenorPeso();
         int arestaPesoDoisNos(Node *n, Node *m);
+        Graph *getVertInduz();
         Graph* agmPrim();
+        void agmPrim(ofstream &arquivo_saida);
         float floydMarshall(int idSource, int idTarget);
         float dijkstra(int idSource, int idTarget);
        

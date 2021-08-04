@@ -11,9 +11,10 @@
 #include <ctime>
 #include <float.h>
 #include <iomanip>
-#define INT_MAX 1000000000
 
 using namespace std;
+
+#define INT_MAX 10000000
 
 /**************************************************************************************************
  * Defining the Graph's methods
@@ -229,6 +230,23 @@ Node *Graph::getNode(int id)
     return nullptr;
 }
 
+void Graph::cleanVisited()
+{
+    /**
+     * @brief Função para definir todos os nós do grafo como não visitados.
+     * 
+     */
+
+    Node *node = this->getFirstNode(); // Ponteiro que armazena o endereço de memória do primeiro nó do grafo.
+
+    // Realiza a operação para todos os nós do grafo.
+    while (node != nullptr)
+    {
+        node->setVisited(false);    // Define o nó como não visitado.
+        node = node->getNextNode(); // Ponteiro passa a apontar para o próximo nó do grafo.
+    }
+}
+
 //Function that prints a set of edges belongs breadth tree
 
 void Graph::breadthFirstSearch(ofstream &output_file)
@@ -251,8 +269,53 @@ void topologicalSorting()
 void breadthFirstSearch(ofstream &output_file)
 {
 }
-Graph *getVertexInduced(int *listIdNodes)
+// Função para gerar um Subgrafo Vértice Induzido
+Graph *Graph::getVertInduz()
 {
+    cout << "\nDigite os IDs dos vértices do subgrafo separados por ponto-vírgula" << endl;
+    cout << "Ex: 2;7;3 " << endl;
+
+    // Lendo os vértices do subgrafo
+    string aux;
+    cout << "Vertices: ";
+    cin >> aux;
+
+    // Vector para armazenar os ids dos vértices do subgrafo
+    vector<int> idvertices;
+    idvertices.clear();
+
+    // Separando a string
+    stringstream ss(aux);
+    while (getline(ss, aux, ';'))
+    {
+        if (this->searchNode(stoi(aux)))
+            idvertices.push_back(stoi(aux));
+        else
+            cout << "Vertice invalido, " << aux << "nao se encontra no grafo original" << endl;
+    }
+
+    // Criar o subgrafo vértice induzido
+    Graph *subgrafo = new Graph(idvertices.size(), this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
+
+    // Inserindo as arestas correspondentes no subgrafo
+    this->cleanVisited();
+    for (int i = 0; i < idvertices.size(); i++)
+    {
+        for (int j = i + 1; j < idvertices.size(); j++)
+
+            // Verificar se a aresta realmente existe no grafo original
+            if ((!this->getNode(idvertices[j])->getVisited()) && this->getNode(idvertices[i])->searchEdge(idvertices[j]))
+            {
+                Edge *aux = this->getNode(idvertices[i])->getEdge(idvertices[j]);
+                subgrafo->insertEdge(idvertices[i], idvertices[j], aux->getWeight());
+            }
+        this->getNode(idvertices[i])->setVisited(true);
+    }
+
+    cout << "\nO Subgrafo X feito com sucesso! ";
+    cout << "(Ordem = " << subgrafo->getOrder() << " e Numero de Arestas = " << subgrafo->getNumberEdges() << ")" << endl;
+
+    return subgrafo;
 }
 
 //Criar uma struct origem, destino, peso
@@ -362,6 +425,7 @@ void Graph::AGMKruskal(ofstream &arquivo_saida)
     cout << "Ponteiros..." << endl;
     //Ponteiro para andar entre os nos
     Node *p = this->getFirstNode();
+
     Edge *a = p->getFirstEdge();
     //No *p = &listaAdj[0];
     //Ponteiro para andar entre as arestas
@@ -528,13 +592,12 @@ int Graph::arestaPesoDoisNos(Node *n, Node *m)
     {
         if (p == m)
         {
-            //TODO: so tem metodo primeira aresta? sera a aresta que conecta a n?
             return p->getFirstEdge()->getWeight();
         }
         p = p->getNextNode();
     }
 
-    //senao retorna o que? inf? ou null? INFINITO 22.07
+    //senao retorna INT_MAX
     return INT_MAX;
 }
 
@@ -552,60 +615,135 @@ int minKey(int key[], bool mstSet[], int tam)
 }
 
 //Graph *agmPrim()
-void agmPrim(int subVertices[], int tam)
+void Graph::agmPrim(ofstream &output_file)
 {
+    output_file << "---------AGM Prim---------" << endl;
+    output_file << "No -- No  |  Peso" << endl;
+    output_file << "--------------------------" << endl;
 
-    //Gera subgrafo induzido com subconjunto X de vertices
+    //guarda os nos com (ids) e os pesos
+    int **graph;
+    //guarda os menores custos
+    int *mincustos = new int[this->getOrder()];
+    //preenche com os vertices adjacentes
+    int *maisProximo = new int[this->getOrder()];
+    //para marcar os vertices visitados
+    bool *visitados = new bool[this->getOrder()];
 
-    //Graph(int order, bool directed, bool weighted_edge, bool weighted_node);
-    Graph *g = new Graph(tam, 0, 1, 0);
+    graph = new int *[this->getOrder()];
 
-    int graph[tam][tam];
-
-    //Vetor para armazenar AGM construida
-    int agm[tam];
-
-    //Valores-chave usados ​​para escolher a borda de peso mínimo no corte
-    int chaves[tam];
-
-    // Para representar o conjunto de vértices incluidos no AGM
-    bool mstSet[tam];
-
-    //Inicializar todas as chaves como INFINITE
-    for (int i = 0; i < tam; i++)
-        chaves[i] = INT_MAX, mstSet[i] = false;
-
-    //Incluir o primeiro primeiro vertice na AGM.
-    //Chave 0 para que primeiro vertice seja escolhido como o primeiro.
-    chaves[0] = 0;
-    agm[0] = -1; // O primeiro nó é sempre a raiz do AGM
-
-    for (int i = 0; i < tam - 1; i++)
+    //preenche a matriz de adjacências com o valor INT_MAX
+    for (int i = 0; i < this->getOrder(); i++)
     {
-        //Escolha o vértice chave mínimo do
-        //conjunto de vértices ainda não incluídos na AGM
-        int u = minKey(chaves, mstSet, tam);
-
-        //Adicione o vertice escolhido ao conjunto MST
-        mstSet[u] = true;
-
-        //Atualizamos o valor da chave e o indice do
-        //vértices adjacentes do vértice escolhido.
-        //Consideramos apenas os vertices que não são
-        //ainda incluído na AGM
-        for (int v = 0; v < tam; v++)
+        graph[i] = new int[this->getOrder()];
+        for (int j = 0; j < this->getOrder(); j++)
         {
-
-            //grafo[u][v] eh diferente de zero apenas para vertices adjacentes de m
-            //mstSet[v] eh falso para vértices ainda não incluídos no MST
-            //Atualize a chave apenas se o grafo[u] [v] for menor que a chave [v]
-            if (graph[u][v] && mstSet[v] == false && graph[u][v] < chaves[v])
-                agm[v] = u, chaves[v] = graph[u][v];
+            graph[i][j] = INT_MAX;
         }
     }
 
-    //imprime a arvore AGM (armazenado em agm)
-    cout << "Aresta \tPeso\n";
-    for (int i = 1; i < tam; i++)
-        cout << agm[i] << " - " << i << " \t" << graph[i][agm[i]] << " \n";
+    //preenche a matriz de adjacências com o peso
+    //TODO: fazer debug aqui no for -> nao esta preenchedo a matriz com os pesos, corretamente
+    for (int i = 0; i < getOrder(); i++)
+    {
+
+        for (Node *p = this->getFirstNode(); p != nullptr; p = p->getNextNode())
+        {
+            for (Edge *a = p->getFirstEdge(); a != nullptr; a = a->getNextEdge())
+            {
+                
+                cout << "a-> no destino:" << a->getTargetId() << endl;
+            
+                graph[i][a->getTargetId()] = a->getWeight();
+                graph[a->getTargetId()][i] = a->getWeight();
+            }
+        }
+    }
+    cout<< "preenchi matriz graph" << endl;
+    for(int i = 0; i < getOrder(); i++)
+    {
+        for (int j = 0; j < getOrder(); j++)
+        {
+            cout << "Matriz:" << endl;
+            cout << "\t " << graph[i][j] << "\t ";
+        }
+    }
+
+    visitados[0] = true;
+    //preenche o vetor de menores custos com os menores custos da matriz de adjacências
+    for (int i = 1; i < this->getOrder(); i++)
+    {
+        mincustos[i] = graph[0][i];
+        maisProximo[i] = 0;
+        visitados[i] = false;
+    }
+
+    int peso = 0;
+    int atualArestas = 0;
+    int verticeAnterior = 0;
+
+    //para o tamanho do grafo
+    for (int i = 0; i < this->getOrder(); i++)
+    {
+        int min = INT_MAX;
+        int indice = 1;
+
+        // percorre o vetor de menores custos atualizando-o de acordo com os nós já visitados
+        for (int j = 0; j < this->getOrder(); j++)
+        {
+            if (mincustos[j] < min && !visitados[j])
+            {
+                min = mincustos[j];
+                indice = j;
+            }
+        }
+
+        //caso o indice seja 1 e o minimo sejá INT_MAX, break
+        if (indice == 1 && min == INT_MAX)
+        {
+            break;
+        }
+        else
+        {
+            peso += min;
+        }
+
+        if (verticeAnterior == 0)
+        {
+            output_file << this->getOrder() << " -- " << indice << " | " << min << endl;
+        }
+        else if (indice == 0)
+        {
+            output_file << verticeAnterior << " -- " << this->getOrder() << " | " << min << endl;
+        }
+        else
+        {
+            output_file << verticeAnterior << " -- " << indice << " | " << min << endl;
+        }
+
+        verticeAnterior = indice;
+        visitados[indice] = true;
+        atualArestas++;
+        for (int j = 1; j < this->getOrder(); j++)
+        {
+
+            if ((graph[indice][j] < mincustos[j]) && (!visitados[j]))
+            {
+                //mincustos representa o peso minimo requerido para ir de um ponto a outro em uma árvore
+                mincustos[j] = graph[indice][j];
+                maisProximo[j] = indice;
+            }
+        }
+    }
+
+    output_file << "--------------------------------------------------------------------------------------------------------" << endl;
+    output_file << "Peso Total: " << peso << endl;
+    output_file << "Numero de arestas: " << atualArestas << endl;
+    output_file << "--------------------------------------------------------------------------------------------------------" << endl
+                << endl;
+    for (int i = 0; i < this->getOrder(); i++)
+    {
+        delete[] graph[i];
+    }
+    delete[] graph;
 }
