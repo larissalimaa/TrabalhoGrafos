@@ -1,0 +1,50 @@
+# depslib dependency file v1.0
+1628196332 source:/home/rosa/Documentos/Ciencia da Computacao/4 Periodo/Teoria dos Grafos/Trabalho/TrabalhoGrafos/Edge.cpp
+	"Edge.h"
+	<iostream>
+
+1628196332 /home/rosa/Documentos/Ciencia da Computacao/4 Periodo/Teoria dos Grafos/Trabalho/TrabalhoGrafos/Edge.h
+
+1628196989 source:/home/rosa/Documentos/Ciencia da Computacao/4 Periodo/Teoria dos Grafos/Trabalho/TrabalhoGrafos/Graph.cpp
+	"Graph.h"
+	"Node.h"
+	"Edge.h"
+	<iostream>
+	<fstream>
+	<stack>
+	<queue>
+	<list>
+	<math.h>
+	<cstdlib>
+	<ctime>
+	<float.h>
+	<iomanip>
+	<algorithm>
+
+1628196769 /home/rosa/Documentos/Ciencia da Computacao/4 Periodo/Teoria dos Grafos/Trabalho/TrabalhoGrafos/Graph.h
+	"Node.h"
+	<fstream>
+	<stack>
+	<list>
+
+1628196332 /home/rosa/Documentos/Ciencia da Computacao/4 Periodo/Teoria dos Grafos/Trabalho/TrabalhoGrafos/Node.h
+	"Edge.h"
+
+1628197810 source:/home/rosa/Documentos/Ciencia da Computacao/4 Periodo/Teoria dos Grafos/Trabalho/TrabalhoGrafos/main.cpp
+	<iostream>
+	<fstream>
+	<string>
+	<math.h>
+	<utility>
+	<tuple>
+	<iomanip>
+	<stdlib.h>
+	<chrono>
+	"Graph.h"
+	"Node.h"
+
+1628196332 source:/home/rosa/Documentos/Ciencia da Computacao/4 Periodo/Teoria dos Grafos/Trabalho/TrabalhoGrafos/Node.cpp
+	"Node.h"
+	"Edge.h"
+	<iostream>
+
