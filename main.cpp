@@ -104,8 +104,8 @@ int menu(){
 
     cout << "MENU" << endl;
     cout << "----" << endl;
-    cout << "[1] Subgrafo induzido por conjunto de vértices" << endl;
-    cout << "[2] Caminho Mínimo entre dois vértices - Dijkstra" << endl;
+    cout << "[1] Fecho Transitivo Direto" << endl;
+    cout << "[2] Fecho Transitivo Indireto" << endl;
     cout << "[3] Caminho Mínimo entre dois vértices - Floyd" << endl;
     cout << "[4] Árvore Geradora Mínima de Kruskal" << endl;
     cout << "[5] Árvore Geradora Mínima de Prim" << endl;
@@ -126,14 +126,35 @@ void selecionar(int selecao, Graph* graph, ofstream& output_file){
 
     switch (selecao) {
 
-        //Subgrafo induzido por um conjunto de vértices X;
         case 1:{
-
+            int id;
+            cout << "Digite o ID do vertice: ";
+            cin >> id;
+            list<int> closureD = graph->directedTransitiveClosure(id);
+            list<int>::iterator it;
+            cout << "Fecho Transitivo direto: " << endl;
+            for(it = closureD.begin(); it != closureD.end(); it++){
+                cout << *it << endl;
+            }
+            getchar();
+            getchar();
+            getchar();
             break;
         }
             //Caminho mínimo entre dois vértices usando Dijkstra;
         case 2:{
-
+            int id;
+            cout << "Digite o ID do vertice: ";
+            cin >> id;
+            list<int> closureI = graph->indirectedTransitiveClosure(id);
+            list<int>::iterator it;
+            cout << "Fecho Transitivo direto: " << endl;
+            for(it = closureI.begin(); it != closureI.end(); it++){
+                cout << *it << endl;
+            }
+            getchar();
+            getchar();
+            getchar();
             break;
         }
 
@@ -143,7 +164,7 @@ void selecionar(int selecao, Graph* graph, ofstream& output_file){
             break;
         }
 
-            //AGM - Kruscal; 
+            //AGM - Kruscal;
             //TODO: -> pedir usuario subconjunto de vertices, armazenar em um vetor e passar tamnho desse vetor
         case 4:{
 

@@ -11,6 +11,7 @@
 #include <ctime>
 #include <float.h>
 #include <iomanip>
+#include <algorithm>
 
 using namespace std;
 
@@ -229,6 +230,51 @@ Node *Graph::getNode(int id)
     }
     return nullptr;
 }
+list <int> Graph::directedTransitiveClosureRec(list <int> &closureD, int id){
+  closureD.push_back(id);
+    for(Node *aux = this->getFirstNode();aux != nullptr; aux = aux->getNextNode()){
+        if(aux->getId() == id){
+            for(Edge *adj = aux->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge()){
+                int targetId = adj->getTargetId();
+                if(find(closureD.begin(),closureD.end(),targetId)== closureD.end()){
+                    directedTransitiveClosureRec(closureD,targetId);
+                }
+            }
+            break;
+        }
+    }
+    return closureD;
+}
+
+list <int> Graph::indirectedTransitiveClosureRec(list <int> &closureI, int id){
+
+    closureI.push_back(id);
+    for(Node *aux = this->getFirstNode();aux != nullptr; aux = aux->getNextNode()){
+        int nodeId = aux->getId();
+        for(Edge *adj = aux->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge()){
+            int targetId = adj->getTargetId();
+            if((targetId == id) && (find(closureI.begin(),closureI.end(),nodeId)==closureI.end())){
+                indirectedTransitiveClosureRec(closureI,nodeId);
+                break;
+            }
+        }
+    }
+    return closureI;
+}
+
+list <int> Graph::directedTransitiveClosure(int id){
+
+    list <int> closureD;
+    directedTransitiveClosureRec(closureD,id);
+    return closureD;
+}
+
+list <int> Graph::indirectedTransitiveClosure(int id){
+    list <int> closureI;
+    indirectedTransitiveClosureRec(closureI,id);
+    return closureI;
+}
+
 
 void Graph::cleanVisited()
 {
@@ -440,18 +486,19 @@ void Graph::AGMKruskal(ofstream &arquivo_saida)
     //percorre o this induzido preenchendo as informações das arestas
     cout << "Ira percorrer" << endl;
     //percorre nos do this induzido
-    for (int j = 0; j < V; j++)
-    {
+    //for (int j = 0; j < V; j++)
+    //{
         //Percorre No Grafo "original"
         while (p != nullptr)
         {
+            a = p->getFirstEdge();
 
             while (a != nullptr)
             {
                 //verifica se no ja foi visitado
-                if (!verificaNo(lista_arestas, j, a->getTargetId(), i))
+                if (!verificaNo(lista_arestas, p->getId(), a->getTargetId(), i))
                 {
-                    lista_arestas[i].origem = j;
+                    lista_arestas[i].origem = p->getId();
                     lista_arestas[i].destino = a->getTargetId();
                     lista_arestas[i].peso = a->getWeight();
                     i++;
@@ -460,7 +507,7 @@ void Graph::AGMKruskal(ofstream &arquivo_saida)
             }
             p = p->getNextNode();
         }
-    }
+    //}
     cout << "Saiu while" << endl;
 
     //ordenar em ordem crescente de pesos.

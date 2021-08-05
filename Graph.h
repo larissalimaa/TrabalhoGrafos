@@ -22,7 +22,8 @@ class Graph{
         bool weighted_node;
         Node* first_node;
         Node* last_node;
-      
+        list <int> directedTransitiveClosureRec(list <int> &closureD, int id);
+        list <int> indirectedTransitiveClosureRec(list <int> &closureI, int id);
 
     public:
         //Constructor
@@ -49,6 +50,8 @@ class Graph{
         void cleanVisited();
 
         //methods phase1
+        list <int> directedTransitiveClosure(int id);
+        list <int> indirectedTransitiveClosure(int id);
         void topologicalSorting();
         void breadthFirstSearch(ofstream& output_file);
         Graph* getVertexInduced(int* listIdNodes);
