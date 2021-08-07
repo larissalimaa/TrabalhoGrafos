@@ -772,10 +772,25 @@ void Graph::agmPrim(ofstream &output_file)
     delete[] graph;
 }
 
-void Graph::profundidade(int id, list<minhaAresta> &arestasArvore, list<minhaAresta> &arestasRetorno){
+void Graph::profundidade(ofstream &arquivo_saida, int id, list<minhaAresta> &arestasArvore, list<minhaAresta> &arestasRetorno){
+
     list<int> visitado;
     //Graph *arvore_profundidade = new Graph(this->getOrder(),false, false, false);
     profundidadeRecursiva(id, arestasArvore, arestasRetorno, visitado);
+    geraSaidaProfundidade(arquivo_saida, arestasArvore, arestasRetorno);
+}
+
+void Graph::geraSaidaProfundidade(ofstream &arquivo_saida, list<minhaAresta> arestasArvore, list<minhaAresta> arestasRetorno){
+    arquivo_saida.clear();
+    arquivo_saida << "graph {" << endl;
+    list<minhaAresta>::iterator it;
+    for(it = arestasArvore.begin(); it != arestasArvore.end(); it++){
+        arquivo_saida << (*it).origem << "--"<< (*it).destino << endl;
+    }
+    for(it = arestasRetorno.begin(); it != arestasRetorno.end(); it++){
+        arquivo_saida << (*it).origem << "--"<< (*it).destino <<  "[style=dotted]" << endl;
+    }
+    arquivo_saida << "}"<< endl;
 }
 
 void Graph::profundidadeRecursiva(int id, list<minhaAresta> &arestasArvore, list<minhaAresta> &arestasRetorno, list<int> &visitado){

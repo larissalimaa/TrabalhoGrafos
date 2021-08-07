@@ -193,7 +193,7 @@ void selecionar(int selecao, Graph* graph, ofstream& arquivo_saida){
             list<minhaAresta> arestasArvore, arestasRetorno;
             cout << "Digite o ID do vertice: ";
             cin >> id;
-            graph->profundidade(id, arestasArvore, arestasRetorno);
+            graph->profundidade(arquivo_saida, id, arestasArvore, arestasRetorno);
             list<minhaAresta>::iterator it;
             cout << "Arestas da arvore: " << endl;
             for(it = arestasArvore.begin(); it != arestasArvore.end(); it++){
@@ -236,6 +236,10 @@ int mainMenu(ofstream& arquivo_saida, Graph* graph){
 
         system("clear");
         selecao = menu();
+    }
+
+    if(arquivo_saida.is_open()){
+        arquivo_saida.close();
     }
 
     return 0;

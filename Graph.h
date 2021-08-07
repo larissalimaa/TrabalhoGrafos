@@ -47,6 +47,8 @@ class Graph{
 
         void profundidadeRecursiva(int id, list<minhaAresta> &arestasArvore, list<minhaAresta> &arestasRetorno, list<int> &visitado);
 
+        void geraSaidaProfundidade(ofstream &arquivo_saida, list<minhaAresta> arestasArvore, list<minhaAresta> arestasRetorno);
+
     public:
 
         //Constructor
@@ -119,7 +121,7 @@ class Graph{
 
         void showVet(minhaAresta array[], int k);
 
-        void profundidade(int id, list<minhaAresta> &arestasArvore, list<minhaAresta> &arestasRetorno);
+        void profundidade(ofstream &arquivo_saida, int id, list<minhaAresta> &arestasArvore, list<minhaAresta> &arestasRetorno);
 };
 
 #endif // GRAPH_H_INCLUDED
