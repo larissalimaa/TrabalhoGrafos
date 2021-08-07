@@ -106,26 +106,26 @@ int menu(){
     cout << "----" << endl;
     cout << "[1] Fecho Transitivo Direto" << endl;
     cout << "[2] Fecho Transitivo Indireto" << endl;
-    cout << "[3] Caminho Mínimo entre dois vértices - Floyd" << endl;
-    cout << "[4] Árvore Geradora Mínima de Kruskal" << endl;
+    cout << "[3] Caminho Mínimo entre dois vértices - Djkstra" << endl;
+    cout << "[4] Caminho Mínimo entre dois vértices - Floyd" << endl;
     cout << "[5] Árvore Geradora Mínima de Prim" << endl;
-    cout << "[6] Imprimir caminhamento em largura" << endl;
-    cout << "[7] Imprimir ordenacao topológica" << endl;
-    cout << "[8] Algoritmo Guloso" << endl;
-    cout << "[9] Algoritmo Guloso Randomizado " << endl;
-    cout << "[10] Algoritmo Guloso Randomizado Reativo" << endl;
+    cout << "[6] Árvore Geradora Mínima de Kruskal" << endl;
+    cout << "[7] Imprimir caminhamento em Profundidade" << endl;
+    cout << "[8] Imprimir Ordenacao Topológica" << endl;
     cout << "[0] Sair" << endl;
 
+    cout << "\nDigite a Opcao Desejada: ";
     cin >> selecao;
 
     return selecao;
 
 }
 
-void selecionar(int selecao, Graph* graph, ofstream& output_file){
+void selecionar(int selecao, Graph* graph, ofstream& arquivo_saida){
 
     switch (selecao) {
 
+        //Fecho Transitivo Direto
         case 1:{
             int id;
             cout << "Digite o ID do vertice: ";
@@ -141,7 +141,7 @@ void selecionar(int selecao, Graph* graph, ofstream& output_file){
             getchar();
             break;
         }
-            //Caminho mínimo entre dois vértices usando Dijkstra;
+            //Fecho Transitivo Indireto
         case 2:{
             int id;
             cout << "Digite o ID do vertice: ";
@@ -158,63 +158,85 @@ void selecionar(int selecao, Graph* graph, ofstream& output_file){
             break;
         }
 
-            //Caminho mínimo entre dois vértices usando Floyd;
+            //Caminho Mínimo entre dois vértices - Djkstra;
         case 3:{
 
             break;
         }
 
-            //AGM - Kruscal;
-            //TODO: -> pedir usuario subconjunto de vertices, armazenar em um vetor e passar tamnho desse vetor
+            //Caminho Mínimo entre dois vértices - Floyd;
         case 4:{
 
-             graph->AGMKruskal(output_file);
 
             break;
         }
 
-            //AGM Prim;
+            //Árvore Geradora Mínima de Prim;
         case 5:{
 
-            graph->agmPrim(output_file);
+            graph->agmPrim(arquivo_saida);
             break;
         }
 
-            //Busca em largura;
+            //Árvore Geradora Mínima de Kruskal;
+            //TODO: -> pedir usuario subconjunto de vertices, armazenar em um vetor e passar tamnho desse vetor
         case 6:{
 
+            graph->AGMKruskal(arquivo_saida);
+            getchar();
+            getchar();
+            getchar();
             break;
         }
-            //Ordenação Topologica;
+            //Imprimir caminhamento em Profundidade;
         case 7:{
+            int id;
+            list<minhaAresta> arestasArvore, arestasRetorno;
+            cout << "Digite o ID do vertice: ";
+            cin >> id;
+            graph->profundidade(id, arestasArvore, arestasRetorno);
+            list<minhaAresta>::iterator it;
+            cout << "Arestas da arvore: " << endl;
+            for(it = arestasArvore.begin(); it != arestasArvore.end(); it++){
+                cout << "(" << (*it).origem << ","<< (*it).destino << ")" << endl;
+            }
+            getchar();
+            getchar();
+
+            break;
+        }
+
+        //Imprimir Ordenacao Topológica;
+        case 8:{
 
 
             break;
         }
+
         default:
         {
-            cout << " Error!!! invalid option!!" << endl;
+            cout << " Erro!!!Opcao Invalida!!!" << endl;
         }
 
     }
 }
 
-int mainMenu(ofstream& output_file, Graph* graph){
+int mainMenu(ofstream& arquivo_saida, Graph* graph){
 
-    int selecao = 1;
+    int selecao = menu();
 
     while(selecao != 0){
-        system("clear");
-        selecao = menu();
 
-        if(output_file.is_open())
-            selecionar(selecao, graph, output_file);
+        if(arquivo_saida.is_open())
+            selecionar(selecao, graph, arquivo_saida);
 
         else
-            cout << "Unable to open the output_file" << endl;
+            cout << "Unable to open the arquivo_saida" << endl;
 
-        output_file << endl;
+        arquivo_saida << endl;
 
+        system("clear");
+        selecao = menu();
     }
 
     return 0;
@@ -227,7 +249,7 @@ int main(int argc, char const *argv[]) {
     //Verificação se todos os parâmetros do programa foram entrados
     if (argc != 6) {
 
-        cout << "ERROR: Expecting: ./<program_name> <input_file> <output_file> <directed> <weighted_edge> <weighted_node> " << endl;
+        cout << "ERROR: Expecting: ./<program_name> <input_file> <arquivo_saida> <directed> <weighted_edge> <weighted_node> " << endl;
         return 1;
 
     }
@@ -243,9 +265,9 @@ int main(int argc, char const *argv[]) {
 
     //Abrindo arquivo de entrada
     ifstream input_file;
-    ofstream output_file;
+    ofstream arquivo_saida;
     input_file.open(argv[1], ios::in);
-    output_file.open(argv[2], ios::out | ios::trunc);
+    arquivo_saida.open(argv[2], ios::out | ios::trunc);
 
 
 
@@ -266,7 +288,7 @@ int main(int argc, char const *argv[]) {
        // }
         //cout << endl;
     //}
-    mainMenu(output_file, graph);
+    mainMenu(arquivo_saida, graph);
 
 
 
@@ -274,7 +296,7 @@ int main(int argc, char const *argv[]) {
     input_file.close();
 
     //Fechando arquivo de saída
-    output_file.close();
+    arquivo_saida.close();
 
     return 0;
 }

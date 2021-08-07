@@ -230,8 +230,10 @@ Node *Graph::getNode(int id)
     }
     return nullptr;
 }
+
 list <int> Graph::directedTransitiveClosureRec(list <int> &closureD, int id){
   closureD.push_back(id);
+
     for(Node *aux = this->getFirstNode();aux != nullptr; aux = aux->getNextNode()){
         if(aux->getId() == id){
             for(Edge *adj = aux->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge()){
@@ -280,7 +282,7 @@ void Graph::cleanVisited()
 {
     /**
      * @brief Função para definir todos os nós do grafo como não visitados.
-     * 
+     *
      */
 
     Node *node = this->getFirstNode(); // Ponteiro que armazena o endereço de memória do primeiro nó do grafo.
@@ -364,19 +366,8 @@ Graph *Graph::getVertInduz()
     return subgrafo;
 }
 
-//Criar uma struct origem, destino, peso
-/**
- * Classe que define uma aresta simples auxiliar ao algoritmo de Kruskal
- */
-struct ArestaK
-{
-public:
-    int origem;
-    int destino;
-    int peso;
-};
 
-bool verificaNo(ArestaK nos_visitados[], int id_no, int id_destino, int tam)
+bool verificaNo(minhaAresta nos_visitados[], int id_no, int id_destino, int tam)
 {
     for (int i = 0; i < tam; i++)
     {
@@ -389,9 +380,9 @@ bool verificaNo(ArestaK nos_visitados[], int id_no, int id_destino, int tam)
 }
 
 // A utility function to swap two elements
-void swap(int *a, int *b)
+void swap(minhaAresta *a, minhaAresta *b)
 {
-    int t = *a;
+    minhaAresta t = *a;
     *a = *b;
     *b = t;
 }
@@ -401,7 +392,7 @@ void swap(int *a, int *b)
     array, and places all smaller (smaller than pivot)
    to left of pivot and all greater elements to right
    of pivot */
-int partition(ArestaK arr[], int low, int high)
+int partition(minhaAresta arr[], int low, int high)
 {
     int pivot = arr[high].peso; // pivot
     int i = (low - 1);          // Index of smaller element
@@ -413,14 +404,14 @@ int partition(ArestaK arr[], int low, int high)
         if (arr[j].peso <= pivot)
         {
             i++; // increment index of smaller element
-            swap(&arr[i].peso, &arr[j].peso);
+            swap(&arr[i], &arr[j]);
         }
     }
-    swap(&arr[i + 1].peso, &arr[high].peso);
+    swap(&arr[i + 1], &arr[high]);
     return (i + 1);
 }
 
-void quickSort(ArestaK arr[], int low, int high)
+void quickSort(minhaAresta arr[], int low, int high)
 {
     if (low < high)
     {
@@ -434,6 +425,19 @@ void quickSort(ArestaK arr[], int low, int high)
         quickSort(arr, pi + 1, high);
     }
 }
+
+void Graph::showVet(minhaAresta array[], int k)
+{
+    cout<< "Lista:";
+    for(int i=0; i<k; i++)
+    {
+        cout << "( " <<array[i].origem << ", " ;
+        cout<< array[i].destino << " ," ;
+        cout<< array[i].peso << " )" ;
+    }
+
+}
+
 /**
  * árvore geradora mínima gerado pelo algoritmo de Kruskal
  * @param arquivo_saida de saida de dados
@@ -458,7 +462,7 @@ void Graph::AGMKruskal(ofstream &arquivo_saida)
 
     //Criar uma lista L com as arestas
     cout << "Criou lista arestas" << endl;
-    ArestaK *lista_arestas = new ArestaK[numArestas];
+    minhaAresta *lista_arestas = new minhaAresta[numArestas];
 
     // Isso armazenara a AGM resultante
     //Edge *result[numArestas];
@@ -507,8 +511,9 @@ void Graph::AGMKruskal(ofstream &arquivo_saida)
             }
             p = p->getNextNode();
         }
-    //}
-    cout << "Saiu while" << endl;
+    showVet(lista_arestas, numArestas);
+
+    //cout << "Saiu while" << endl;
 
     //ordenar em ordem crescente de pesos.
 
@@ -516,9 +521,9 @@ void Graph::AGMKruskal(ofstream &arquivo_saida)
     cout << "foi no quicksort" << endl;
     quickSort(lista_arestas, 0, numArestas - 1);
     cout << "saiu do quicksort" << endl;
-
+    showVet(lista_arestas, numArestas);
     //vetor com as arestas da solucao
-    ArestaK *solucao = new ArestaK[numArestas];
+    minhaAresta *solucao = new minhaAresta[numArestas];
 
     //pecorre toda a lista de arestas colocando cada uma no grafo para verificação de ciclos
     //caso o grafo possua ciclo, a aresta é removida e não será colocada na solução
@@ -571,21 +576,10 @@ void Graph::AGMKruskal(ofstream &arquivo_saida)
     arquivo_saida << "---------AGM KRUSKAL---------" << endl;
     arquivo_saida << "[No_Origem -- No_Destino] - Peso" << endl;
     arquivo_saida << "-----------------------------" << endl;
+    arquivo_saida << "Ordem:" << this->getOrder()<< endl;
     for (int l = 0; l < numSolucao; l++)
     {
-
-        if (solucao[l].origem == 0)
-        {
-            arquivo_saida << "[" << this->getOrder() << " -> " << solucao[l].destino << "] - " << solucao[l].peso << endl;
-        }
-        else if (solucao[l].destino == 0)
-        {
-            arquivo_saida << "[" << solucao[l].origem << " -> " << this->getOrder() << "] - " << solucao[l].peso << endl;
-        }
-        else
-        {
-            arquivo_saida << "[" << solucao[l].origem << " -> " << solucao[l].destino << "] - " << solucao[l].peso << endl;
-        }
+        arquivo_saida << "[" << solucao[l].origem << "-> " << solucao[l].destino <<  "] -" << solucao[l].peso << endl;
 
         somatorioPesos += solucao[l].peso;
     }
@@ -698,9 +692,9 @@ void Graph::agmPrim(ofstream &output_file)
         {
             for (Edge *a = p->getFirstEdge(); a != nullptr; a = a->getNextEdge())
             {
-                
+
                 cout << "a-> no destino:" << a->getTargetId() << endl;
-            
+
                 graph[i][a->getTargetId()] = a->getWeight();
                 graph[a->getTargetId()][i] = a->getWeight();
             }
@@ -793,4 +787,29 @@ void Graph::agmPrim(ofstream &output_file)
         delete[] graph[i];
     }
     delete[] graph;
+}
+
+void Graph::profundidade(int id, list<minhaAresta> &arestasArvore, list<minhaAresta> &arestasRetorno){
+    list<int> visitado;
+    //Graph *arvore_profundidade = new Graph(this->getOrder(),false, false, false);
+    profundidadeRecursiva(id, arestasArvore, arestasRetorno, visitado);
+}
+
+void Graph::profundidadeRecursiva(int id, list<minhaAresta> &arestasArvore, list<minhaAresta> &arestasRetorno, list<int> &visitado){
+    for(Node *aux = this->getFirstNode();aux != nullptr; aux = aux->getNextNode()){
+        if(aux->getId() == id){
+            visitado.push_back(id);
+            for(Edge *adj = aux->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge()){
+                minhaAresta aresta = {id, adj->getTargetId(), 0};
+                if(find(visitado.begin(), visitado.end(), adj->getTargetId()) == visitado.end()){
+                    arestasArvore.push_back(aresta);
+                    profundidadeRecursiva(adj->getTargetId(), arestasArvore, arestasRetorno, visitado);
+                }
+                else{
+                    arestasRetorno.push_back(aresta);
+                }
+            }
+            break;
+        }
+    }
 }

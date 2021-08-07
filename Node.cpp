@@ -260,5 +260,3 @@ Edge* Node::hasEdgeBetween(int target_id)
     }
     return nullptr;
 }
-
-
