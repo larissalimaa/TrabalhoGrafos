@@ -1,2 +1,3 @@
 g++ *.c* -o exec.exe
-exec.exe instancias/grafo_9815.txt resultados/resultado.txt
+exec.exe grafo_3596.txt resultado.txt 0 1 0
+3288;385;2470;2625;23;325;1198;1655

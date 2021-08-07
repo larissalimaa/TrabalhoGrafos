@@ -178,14 +178,13 @@ void selecionar(int selecao, Graph* graph, ofstream& arquivo_saida){
             break;
         }
 
-            //Árvore Geradora Mínima de Kruskal;
-            //TODO: -> pedir usuario subconjunto de vertices, armazenar em um vetor e passar tamnho desse vetor
+            
         case 6:{
 
-            graph->AGMKruskal(arquivo_saida);
-            getchar();
-            getchar();
-            getchar();
+            graph->AGMKruskal(graph->getVertInduz(), arquivo_saida);
+            //getchar();
+            //getchar();
+            //getchar();
             break;
         }
             //Imprimir caminhamento em Profundidade;

@@ -99,7 +99,9 @@ class Graph{
 
         Graph* getVertexInduced(int* listIdNodes);
 
-        void AGMKruskal(ofstream &arquivo_saida);
+        void imprimeKruskal(ofstream &arquivo_saida, minhaAresta solucao[], int numSolucao, int Ordem);
+
+        void AGMKruskal(Graph *subgrafo, ofstream &arquivo_saida);
 
         Node* arestaMenorPeso();
 

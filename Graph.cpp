@@ -438,114 +438,115 @@ void Graph::showVet(minhaAresta array[], int k)
 
 }
 
+void Graph::imprimeKruskal(ofstream &arquivo_saida, minhaAresta solucao[], int numSolucao, int Ordem)
+{
+    cout << "imprime solucao" << endl;
+    int somatorioPesos = 0;
+    arquivo_saida << "---------AGM KRUSKAL---------" << endl;
+    arquivo_saida << "[No_Origem -- No_Destino] - Peso" << endl;
+    arquivo_saida << "-----------------------------" << endl;
+    arquivo_saida << "Ordem:" << Ordem << endl;
+    for (int i = 0; i < numSolucao; i++)
+    {
+        arquivo_saida << "[" << solucao[i].origem << "-> " << solucao[i].destino << "] - " << solucao[i].peso << endl;
+
+        somatorioPesos += solucao[i].peso;
+    }
+    arquivo_saida << "Somatorio dos Pesos: " << somatorioPesos << endl;
+    arquivo_saida << "Quantidade de arestas: " << numSolucao << endl;
+    arquivo_saida << "--------------------------------------------------------------------------------------------------------" << endl
+                  << endl;
+}
+
 /**
  * árvore geradora mínima gerado pelo algoritmo de Kruskal
- * @param arquivo_saida de saida de dados
+ * @param subgrafo Subgrafo induzido com subconjunto X de vertices
+ * @param arquivo_saida arquivo de saida de dados
  */
-void Graph::AGMKruskal(ofstream &arquivo_saida)
+void Graph::AGMKruskal(Graph *subgrafo, ofstream &arquivo_saida)
 {
-    //Gera this induzido com subconjunto X de vertices
 
-    //Graph(int order, bool directed, bool weighted_edge, bool weighted_node);
-    //Graph *g = new Graph(tam, 0, 1, 0);
-
-    cout << "Entrou no algoritmo" << endl;
     //Numero de Arestas
-    int numArestas = this->getNumberEdges();
-
-    cout << "numArestas:" << numArestas << endl;
+    int numArestas = subgrafo->getNumberEdges();
 
     //Numero de Nos
-    int V = this->getOrder();
-
-    cout << "Ordem:" << V << endl;
+    int V = subgrafo->getOrder();
 
     //Criar uma lista L com as arestas
-    cout << "Criou lista arestas" << endl;
     minhaAresta *lista_arestas = new minhaAresta[numArestas];
-
-    // Isso armazenara a AGM resultante
-    //Edge *result[numArestas];
 
     //Vetor com id dos Vertices
     int vetoridNos[V];
 
     //Vetor aux com subarvores de um no
     int subarvores[V];
-    cout << "Ponteiros..." << endl;
+
     //Ponteiro para andar entre os nos
-    Node *p = this->getFirstNode();
+    Node *p = subgrafo->getFirstNode();
 
-    Edge *a = p->getFirstEdge();
-    //No *p = &listaAdj[0];
     //Ponteiro para andar entre as arestas
-    //Edge *a = p->getFirstEdge();
+    Edge *a = p->getFirstEdge();
 
+    //variavel auxiliar para armazenar peso
     int auxPeso;
-
-    int contador;
 
     int i = 0;
 
     //percorre o this induzido preenchendo as informações das arestas
-    cout << "Ira percorrer" << endl;
-    //percorre nos do this induzido
-    //for (int j = 0; j < V; j++)
-    //{
-        //Percorre No Grafo "original"
-        while (p != nullptr)
+
+    //Percorre no subgrafo
+    while (p != nullptr)
+    {
+        a = p->getFirstEdge();
+
+        while (a != nullptr)
         {
-            a = p->getFirstEdge();
-
-            while (a != nullptr)
+            //verifica se no ja foi visitado
+            if (!verificaNo(lista_arestas, p->getId(), a->getTargetId(), i))
             {
-                //verifica se no ja foi visitado
-                if (!verificaNo(lista_arestas, p->getId(), a->getTargetId(), i))
-                {
-                    lista_arestas[i].origem = p->getId();
-                    lista_arestas[i].destino = a->getTargetId();
-                    lista_arestas[i].peso = a->getWeight();
-                    i++;
-                }
-                a = a->getNextEdge();
+                lista_arestas[i].origem = p->getId();
+                lista_arestas[i].destino = a->getTargetId();
+                lista_arestas[i].peso = a->getWeight();
+                i++;
             }
-            p = p->getNextNode();
+            a = a->getNextEdge();
         }
-    showVet(lista_arestas, numArestas);
-
-    //cout << "Saiu while" << endl;
+        p = p->getNextNode();
+    }
+    //showVet(lista_arestas, numArestas);
 
     //ordenar em ordem crescente de pesos.
-
     //Algoritmo de quicksorte escolhido
-    cout << "foi no quicksort" << endl;
+
     quickSort(lista_arestas, 0, numArestas - 1);
-    cout << "saiu do quicksort" << endl;
-    showVet(lista_arestas, numArestas);
+
+    //showVet(lista_arestas, numArestas);
+
     //vetor com as arestas da solucao
     minhaAresta *solucao = new minhaAresta[numArestas];
 
     //pecorre toda a lista de arestas colocando cada uma no grafo para verificação de ciclos
-    //caso o grafo possua ciclo, a aresta é removida e não será colocada na solução
+    //caso o grafo possua ciclo, a aresta eh removida e nao sera colocada na solução
 
     //contador de numero de arestas na solucao
     int numSolucao = 0;
+
+    //indice para solucao
     int atual = 0;
+
+    //vetor com tamanho de Arestas
     int arvore[numArestas];
 
-    //inicia o vetor arvore
+    //inicia o vetor arvore de 0 a numArestas
     for (int i = 0; i < numArestas; i++)
     {
         arvore[i] = i;
     }
+
     //percorre as arestas adicionando-as no vetor arvore e na solução
-    cout << "percorre as arestas" << endl;
     int c = 0;
-    cout << "c=" << c << endl;
-    //percorre as arestas adicionando-as no vetor arvore e na solução
     while (c < numArestas)
     {
-        cout << "while arestas" << endl;
         int u = lista_arestas[c].origem;
         int v = lista_arestas[c].destino;
 
@@ -565,33 +566,15 @@ void Graph::AGMKruskal(ofstream &arquivo_saida)
             }
         }
         c++;
-        cout << "c=" << c << endl;
     }
-
-    cout << " fim percorre as arestas" << endl;
-
+    cout<< "veio ate aqui" << endl;
     //Imprime Solução
-    cout << "imprime solucao" << endl;
-    unsigned long long int somatorioPesos = 0;
-    arquivo_saida << "---------AGM KRUSKAL---------" << endl;
-    arquivo_saida << "[No_Origem -- No_Destino] - Peso" << endl;
-    arquivo_saida << "-----------------------------" << endl;
-    arquivo_saida << "Ordem:" << this->getOrder()<< endl;
-    for (int l = 0; l < numSolucao; l++)
-    {
-        arquivo_saida << "[" << solucao[l].origem << "-> " << solucao[l].destino <<  "] -" << solucao[l].peso << endl;
+    imprimeKruskal(arquivo_saida, solucao, numSolucao, subgrafo->getOrder());
 
-        somatorioPesos += solucao[l].peso;
-    }
-    arquivo_saida << "Somatorio dos Pesos: " << somatorioPesos << endl;
-    arquivo_saida << "Quantidade de arestas: " << numSolucao << endl;
-    arquivo_saida << "--------------------------------------------------------------------------------------------------------" << endl
-                  << endl;
-
+    //desaloca
     delete[] lista_arestas;
     delete[] solucao;
 }
-
 Node *Graph::arestaMenorPeso()
 {
     Node *p = this->getFirstNode();
