@@ -121,7 +121,7 @@ int menu(){
 
 }
 
-void selecionar(int selecao, Graph* graph, ofstream& arquivo_saida){
+void selecionar(int selecao, Graph* graph, ofstream& output_file){
 
     switch (selecao) {
 
@@ -130,15 +130,7 @@ void selecionar(int selecao, Graph* graph, ofstream& arquivo_saida){
             int id;
             cout << "Digite o ID do vertice: ";
             cin >> id;
-            list<int> closureD = graph->directedTransitiveClosure(id);
-            list<int>::iterator it;
-            cout << "Fecho Transitivo direto: " << endl;
-            for(it = closureD.begin(); it != closureD.end(); it++){
-                cout << *it << endl;
-            }
-            getchar();
-            getchar();
-            getchar();
+            graph->directedTransitiveClosure(output_file, id);
             break;
         }
             //Fecho Transitivo Indireto
@@ -146,15 +138,7 @@ void selecionar(int selecao, Graph* graph, ofstream& arquivo_saida){
             int id;
             cout << "Digite o ID do vertice: ";
             cin >> id;
-            list<int> closureI = graph->indirectedTransitiveClosure(id);
-            list<int>::iterator it;
-            cout << "Fecho Transitivo direto: " << endl;
-            for(it = closureI.begin(); it != closureI.end(); it++){
-                cout << *it << endl;
-            }
-            getchar();
-            getchar();
-            getchar();
+            graph->indirectedTransitiveClosure(output_file, id);
             break;
         }
 
@@ -174,40 +158,30 @@ void selecionar(int selecao, Graph* graph, ofstream& arquivo_saida){
             //Árvore Geradora Mínima de Prim;
         case 5:{
 
-            graph->agmPrim(arquivo_saida);
+            graph->AGMPrim(graph->getVertInduz(),output_file);
             break;
         }
 
-            
+
         case 6:{
 
-            graph->AGMKruskal(graph->getVertInduz(), arquivo_saida);
-            //getchar();
-            //getchar();
-            //getchar();
+            graph->AGMKruskal(graph->getVertInduz(), output_file);
             break;
         }
             //Imprimir caminhamento em Profundidade;
         case 7:{
             int id;
-            list<minhaAresta> arestasArvore, arestasRetorno;
             cout << "Digite o ID do vertice: ";
             cin >> id;
-            graph->profundidade(arquivo_saida, id, arestasArvore, arestasRetorno);
-            list<minhaAresta>::iterator it;
-            cout << "Arestas da arvore: " << endl;
-            for(it = arestasArvore.begin(); it != arestasArvore.end(); it++){
-                cout << "(" << (*it).origem << ","<< (*it).destino << ")" << endl;
-            }
-            getchar();
-            getchar();
-
+            graph->depth(output_file, id);
             break;
         }
 
         //Imprimir Ordenacao Topológica;
         case 8:{
-
+            graph->topologicalSorting(output_file);
+            getchar();
+            getchar();
 
             break;
         }
@@ -220,26 +194,26 @@ void selecionar(int selecao, Graph* graph, ofstream& arquivo_saida){
     }
 }
 
-int mainMenu(ofstream& arquivo_saida, Graph* graph){
+int mainMenu(ofstream& output_file, Graph* graph){
 
     int selecao = menu();
 
     while(selecao != 0){
 
-        if(arquivo_saida.is_open())
-            selecionar(selecao, graph, arquivo_saida);
+        if(output_file.is_open())
+            selecionar(selecao, graph, output_file);
 
         else
-            cout << "Unable to open the arquivo_saida" << endl;
+            cout << "Unable to open the output_file" << endl;
 
-        arquivo_saida << endl;
+        output_file << endl;
 
         system("clear");
         selecao = menu();
     }
 
-    if(arquivo_saida.is_open()){
-        arquivo_saida.close();
+    if(output_file.is_open()){
+        output_file.close();
     }
 
     return 0;
@@ -252,7 +226,7 @@ int main(int argc, char const *argv[]) {
     //Verificação se todos os parâmetros do programa foram entrados
     if (argc != 6) {
 
-        cout << "ERROR: Expecting: ./<program_name> <input_file> <arquivo_saida> <directed> <weighted_edge> <weighted_node> " << endl;
+        cout << "ERROR: Expecting: ./<program_name> <input_file> <output_file> <directed> <weighted_edge> <weighted_node> " << endl;
         return 1;
 
     }
@@ -268,9 +242,9 @@ int main(int argc, char const *argv[]) {
 
     //Abrindo arquivo de entrada
     ifstream input_file;
-    ofstream arquivo_saida;
+    ofstream output_file;
     input_file.open(argv[1], ios::in);
-    arquivo_saida.open(argv[2], ios::out | ios::trunc);
+    output_file.open(argv[2], ios::out | ios::trunc);
 
 
 
@@ -291,7 +265,7 @@ int main(int argc, char const *argv[]) {
        // }
         //cout << endl;
     //}
-    mainMenu(arquivo_saida, graph);
+    mainMenu(output_file, graph);
 
 
 
@@ -299,7 +273,7 @@ int main(int argc, char const *argv[]) {
     input_file.close();
 
     //Fechando arquivo de saída
-    arquivo_saida.close();
+    output_file.close();
 
     return 0;
 }

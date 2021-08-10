@@ -17,10 +17,10 @@ using namespace std;
  */
 typedef struct
 {
-    int origem;
-    int destino;
-    int peso;
-} minhaAresta;
+    int origin;
+    int destiny;
+    int weight;
+} myEdge;
 
 class Graph{
 
@@ -45,9 +45,9 @@ class Graph{
 
         list <int> indirectedTransitiveClosureRec(list <int> &closureI, int id);
 
-        void profundidadeRecursiva(int id, list<minhaAresta> &arestasArvore, list<minhaAresta> &arestasRetorno, list<int> &visitado);
+        void depthRecursive(int id, list<myEdge> &treeEdge, list<myEdge> &returnEdge, int *father, int time, int *timeFind, int *timeFinish);
 
-        void geraSaidaProfundidade(ofstream &arquivo_saida, list<minhaAresta> arestasArvore, list<minhaAresta> arestasRetorno);
+        void outputdepth(ofstream &output_file, list<myEdge> treeEdge, list<myEdge> returnEdge);
 
     public:
 
@@ -90,20 +90,26 @@ class Graph{
 
         void cleanVisited();
 
+        void printGraph();
+
         //methods phase1
-        list <int> directedTransitiveClosure(int id);
+        void directedTransitiveClosure(ofstream &output_file, int id);
 
-        list <int> indirectedTransitiveClosure(int id);
+        void indirectedTransitiveClosure(ofstream &output_file, int id);
 
-        void topologicalSorting();
+        void topologicalSorting(ofstream &output_file);
 
-        void breadthFirstSearch(ofstream& output_file);
+	    void breadthFirstSearch(ofstream &output_file);
 
         Graph* getVertexInduced(int* listIdNodes);
 
-        void imprimeKruskal(ofstream &arquivo_saida, minhaAresta solucao[], int numSolucao, int Ordem);
+        void printKruskal(ofstream &output_file, myEdge solution[], int numberSolution, int Ordem);
 
-        void AGMKruskal(Graph *subgrafo, ofstream &arquivo_saida);
+        void AGMKruskal(Graph *subgrafo, ofstream &output_file);
+
+	    void auxprintPrim(ofstream &output_file, int peso, int atualArestas);
+
+        void printPrim(ofstream &output_file, int previousvertex, int indice, int i, int min);
 
         Node* arestaMenorPeso();
 
@@ -111,17 +117,15 @@ class Graph{
 
         Graph *getVertInduz();
 
-        Graph* agmPrim();
-
-        void agmPrim(ofstream &arquivo_saida);
+        void AGMPrim(Graph *subgrafo, ofstream &output_file);
 
         float floydMarshall(int idSource, int idTarget);
 
         float dijkstra(int idSource, int idTarget);
 
-        void showVet(minhaAresta array[], int k);
+        void showVet(myEdge array[], int k);
 
-        void profundidade(ofstream &arquivo_saida, int id, list<minhaAresta> &arestasArvore, list<minhaAresta> &arestasRetorno);
+        void depth(ofstream &output_file, int id);
 };
 
 #endif // GRAPH_H_INCLUDED

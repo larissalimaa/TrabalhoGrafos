@@ -152,6 +152,8 @@ void Graph::insertEdge(int id, int target_id, float weight)
         if (this->getDirected())
         {
             node->insertEdge(target_id, weight);
+            node->incrementOutDegree();
+            target_node->incrementInDegree();
         }
         else
         {
@@ -230,32 +232,59 @@ Node *Graph::getNode(int id)
     }
     return nullptr;
 }
+void Graph::printGraph()
+{
+    cout << "Impressao Grafo: " << endl;
+    for (Node *aux = this->getFirstNode(); aux != nullptr; aux = aux->getNextNode())
+    {
+        cout << aux->getId();
+        for (Edge *adj = aux->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge())
+        {
+            cout << " -  " << adj->getTargetId() << " (" << adj->getWeight() << ")";
+        }
+        cout << endl;
+    }
+}
 
+//Fecho Transitivo Direto Recursivo
 list <int> Graph::directedTransitiveClosureRec(list <int> &closureD, int id){
-  closureD.push_back(id);
 
-    for(Node *aux = this->getFirstNode();aux != nullptr; aux = aux->getNextNode()){
-        if(aux->getId() == id){
-            for(Edge *adj = aux->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge()){
-                int targetId = adj->getTargetId();
-                if(find(closureD.begin(),closureD.end(),targetId)== closureD.end()){
-                    directedTransitiveClosureRec(closureD,targetId);
-                }
-            }
-            break;
+    closureD.push_back(id);
+    Node *node = getNode(id);
+
+    //Percorre os vertices adjacentes
+    for(Edge *adj = node->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge())
+    {
+        int targetId = adj->getTargetId();
+
+        //Verifica se o vertice ja esta no fecho
+        if(find(closureD.begin(),closureD.end(),targetId)== closureD.end())
+        {
+            directedTransitiveClosureRec(closureD,targetId);
         }
     }
+
     return closureD;
 }
 
+//Fecho Transitivo Indireto Recursivo
 list <int> Graph::indirectedTransitiveClosureRec(list <int> &closureI, int id){
 
     closureI.push_back(id);
-    for(Node *aux = this->getFirstNode();aux != nullptr; aux = aux->getNextNode()){
+
+    //Percorre a lista de nos
+    for(Node *aux = this->getFirstNode();aux != nullptr; aux = aux->getNextNode())
+    {
         int nodeId = aux->getId();
-        for(Edge *adj = aux->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge()){
+
+        //Percorre a lista adjacente a procura de arestas em que o no e destino
+        for(Edge *adj = aux->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge())
+        {
             int targetId = adj->getTargetId();
-            if((targetId == id) && (find(closureI.begin(),closureI.end(),nodeId)==closureI.end())){
+
+            //Verifica se o no e o destino
+            if((targetId == id) && (find(closureI.begin(),closureI.end(),nodeId)==closureI.end()))
+            {
                 indirectedTransitiveClosureRec(closureI,nodeId);
                 break;
             }
@@ -264,71 +293,139 @@ list <int> Graph::indirectedTransitiveClosureRec(list <int> &closureI, int id){
     return closureI;
 }
 
-list <int> Graph::directedTransitiveClosure(int id){
+//Impressao do Fecho Transitivo Direto
+void Graph::directedTransitiveClosure(ofstream &output_file, int id){
 
     list <int> closureD;
-    directedTransitiveClosureRec(closureD,id);
-    return closureD;
+
+    closureD = directedTransitiveClosureRec(closureD,id);
+
+    list<int>::iterator it;
+
+    cout << "Fecho Transitivo Direto: " << endl;
+
+    //Imprime o fecho transitivo direto na tela
+    for(it = closureD.begin(); it != closureD.end(); it++){
+        cout << *it << endl;
+    }
+
+    //saida .dot
+    output_file << "graph {" << endl;
+    for(it = closureD.begin(); it != closureD.end(); it++){
+        output_file << *it << endl;
+    }
+    output_file << "}";
+    getchar();
+    getchar();
 }
 
-list <int> Graph::indirectedTransitiveClosure(int id){
+//Impressao do Fecho Transitivo Indireto
+void Graph::indirectedTransitiveClosure(ofstream &output_file, int id){
+
     list <int> closureI;
+
     indirectedTransitiveClosureRec(closureI,id);
-    return closureI;
+
+    list<int>::iterator it;
+
+    cout << "Fecho Transitivo Indireto: " << endl;
+
+    //Imprime o fecho transitivo indireto na tela
+    for(it = closureI.begin(); it != closureI.end(); it++){
+        cout << *it << endl;
+    }
+
+    //saida .dot
+    output_file << "graph {" << endl;
+    for(it = closureI.begin(); it != closureI.end(); it++){
+        output_file << *it << endl;
+    }
+    output_file << "}";
+    getchar();
+    getchar();
 }
 
-
+//Funcao para marcar os nos do grafo como nao visited
 void Graph::cleanVisited()
 {
-    /**
-     * @brief Função para definir todos os nós do grafo como não visitados.
-     *
-     */
 
-    Node *node = this->getFirstNode(); // Ponteiro que armazena o endereço de memória do primeiro nó do grafo.
+    //Ponteiro para percorrer entre os nos
+    Node *n = this->getFirstNode();
 
-    // Realiza a operação para todos os nós do grafo.
-    while (node != nullptr)
+    while (n != nullptr)
     {
-        node->setVisited(false);    // Define o nó como não visitado.
-        node = node->getNextNode(); // Ponteiro passa a apontar para o próximo nó do grafo.
+        //Seta o no como nao visitado
+        n->setVisited(false);
+        //Ponteiro passa a apontar para o proximo no do grafo.
+        n = n->getNextNode();
     }
 }
 
-//Function that prints a set of edges belongs breadth tree
-
-void Graph::breadthFirstSearch(ofstream &output_file)
+//Ordenacao Topologica
+void Graph::topologicalSorting(ofstream &output_file)
 {
-}
+    //Lista de vertices fontes
+    list<Node*> sources;
 
-float Graph::floydMarshall(int idSource, int idTarget)
-{
-}
+    //Lista com a ordenacao topologica
+    list<int> sorting;
 
-float Graph::dijkstra(int idSource, int idTarget)
-{
-}
+    // Percorre a lista de vertice e encontra os vertices que são fontes
+    for(Node *aux = this->getFirstNode();aux != nullptr; aux = aux->getNextNode()){
+        //Testa o grau de entrada
+        if(aux->getInDegree() == 0){
+            //Insere os vertices fontes na lista
+            sources.push_back(aux);
+        }
+    }
+    //Enquanto tiver algum vertice fonte percorre a lista
+    while (!sources.empty()){
+        //Retira o primeiro vertice da lista de fonte
+        Node *s = sources.front();
+        sources.pop_front();
+        //Insere o vertice na ordenacao topologica
+        sorting.push_back(s->getId());
 
-//function that prints a topological sorting
-void topologicalSorting()
-{
+        //Percorre os adjacentes de s
+        for(Edge *adj = s->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge()){
+            //Busca o vertice adjacente na lista de vertices
+            Node *node = this->getNode(adj->getTargetId());
+            //Reduz o grau de entrada do vertice
+            node->decrementInDegree();
+            //Se for fonte insere na lista de fontes
+            if(node->getInDegree() == 0){
+                sources.push_back(node);
+            }
+        }
+    }
+    //Impressao da ordenacao topologica
+    if(sorting.size() == this->getOrder()){
+        list<int>::iterator it;
+        cout << "Ordenacao Topologica: " << endl;
+        for(it = sorting.begin(); it != sorting.end(); it++){
+            cout << (*it) << endl;
+        }
+    }
+    else{
+        cout << "Nao e um grafo aciclico direcionado" << endl;
+    }
 }
 
 void breadthFirstSearch(ofstream &output_file)
 {
 }
-// Função para gerar um Subgrafo Vértice Induzido
+// Funcao para gerar um subgraph Vertice Induzido
 Graph *Graph::getVertInduz()
 {
-    cout << "\nDigite os IDs dos vértices do subgrafo separados por ponto-vírgula" << endl;
+    cout << "\nDigite os IDs dos vertices do subgraph separados por ponto-virgula" << endl;
     cout << "Ex: 2;7;3 " << endl;
 
-    // Lendo os vértices do subgrafo
+    // Lendo os vertices do subgraph
     string aux;
     cout << "Vertices: ";
     cin >> aux;
 
-    // Vector para armazenar os ids dos vértices do subgrafo
+    // Vector para armazenar os ids dos vertices do subgraph
     vector<int> idvertices;
     idvertices.clear();
 
@@ -339,13 +436,13 @@ Graph *Graph::getVertInduz()
         if (this->searchNode(stoi(aux)))
             idvertices.push_back(stoi(aux));
         else
-            cout << "Vertice invalido, " << aux << "nao se encontra no grafo original" << endl;
+            cout << "Vertice invalido, " << aux << " nao se encontra no grafo original" << endl;
     }
 
-    // Criar o subgrafo vértice induzido
-    Graph *subgrafo = new Graph(idvertices.size(), this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
+    // Criar o subgraph vertice induzido
+    Graph *subgraph = new Graph(idvertices.size(), this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
 
-    // Inserindo as arestas correspondentes no subgrafo
+    // Inserindo as arestas correspondentes no subgraph
     this->cleanVisited();
     for (int i = 0; i < idvertices.size(); i++)
     {
@@ -355,23 +452,34 @@ Graph *Graph::getVertInduz()
             if ((!this->getNode(idvertices[j])->getVisited()) && this->getNode(idvertices[i])->searchEdge(idvertices[j]))
             {
                 Edge *aux = this->getNode(idvertices[i])->getEdge(idvertices[j]);
-                subgrafo->insertEdge(idvertices[i], idvertices[j], aux->getWeight());
+                subgraph->insertEdge(idvertices[i], idvertices[j], aux->getWeight());
             }
         this->getNode(idvertices[i])->setVisited(true);
     }
 
-    cout << "\nO Subgrafo X feito com sucesso! ";
-    cout << "(Ordem = " << subgrafo->getOrder() << " e Numero de Arestas = " << subgrafo->getNumberEdges() << ")" << endl;
+    cout << "\nO subgraph X feito com sucesso! ";
+    cout << "(Ordem = " << subgraph->getOrder() << " e Numero de Arestas = " << subgraph->getNumberEdges() << ")" << endl;
 
-    return subgrafo;
+    //int escolha;
+    //cout<< "Gostaria de imprimir o subgrafo?" << endl;
+    //cout << "(1) para Sim; (0) para Nao;" << endl;
+    //cout<< "Opcao: ";
+    //cin >> escolha;
+
+    //if(escolha == 1)
+    //{
+        //subgraph->printGraph();
+    //}
+
+    return subgraph;
 }
 
-
-bool verificaNo(minhaAresta nos_visitados[], int id_no, int id_destino, int tam)
+//FIXME: Larissa comentar
+bool checkNode(myEdge nos_visited[], int id_node, int id_destiny, int size)
 {
-    for (int i = 0; i < tam; i++)
+    for (int i = 0; i < size; i++)
     {
-        if (nos_visitados[i].origem == id_destino && nos_visitados[i].destino == id_no)
+        if (nos_visited[i].origin == id_destiny && nos_visited[i].destiny == id_node)
         {
             return true;
         }
@@ -379,31 +487,35 @@ bool verificaNo(minhaAresta nos_visitados[], int id_no, int id_destino, int tam)
     return false;
 }
 
-// A utility function to swap two elements
-void swap(minhaAresta *a, minhaAresta *b)
+//Uma funcao de utilidade para trocar dois elementos
+void swap(myEdge *a, myEdge *b)
 {
-    minhaAresta t = *a;
+    myEdge t = *a;
     *a = *b;
     *b = t;
 }
 
-/* This function takes last element as pivot, places
-   the pivot element at its correct position in sorted
-    array, and places all smaller (smaller than pivot)
-   to left of pivot and all greater elements to right
-   of pivot */
-int partition(minhaAresta arr[], int low, int high)
+/* Esta funcao pega o ultimo elemento como pivo, coloca o elemento pivo em sua posicao correta
+*  na matriz classificada e coloca todos os elementos menores (menores do que o pivo) a esquerda
+*  do pivo e todos os elementos maiores à direita do pivo
+*/
+int partition(myEdge arr[], int low, int high)
 {
-    int pivot = arr[high].peso; // pivot
-    int i = (low - 1);          // Index of smaller element
+    //pivo
+    int pivot = arr[high].weight;
+
+    //indice do elemento menor
+    int i = (low - 1);
 
     for (int j = low; j <= high - 1; j++)
     {
-        // If current element is smaller than or
-        // equal to pivot
-        if (arr[j].peso <= pivot)
+        //Se o elemento current for menor que ou
+        //igual ao pivo
+        if (arr[j].weight <= pivot)
         {
-            i++; // increment index of smaller element
+            //incrementa o indice do elemento menor
+            i++;
+            //e troca o indice menor i com o current j
             swap(&arr[i], &arr[j]);
         }
     }
@@ -411,90 +523,94 @@ int partition(minhaAresta arr[], int low, int high)
     return (i + 1);
 }
 
-void quickSort(minhaAresta arr[], int low, int high)
+void quickSort(myEdge arr[], int low, int high)
 {
     if (low < high)
     {
-        /* pi is partitioning index, arr[p] is now
-           at right place */
+        //pi eh o indice de particionamento
         int pi = partition(arr, low, high);
 
-        // Separately sort elements before
-        // partition and after partition
+        //Classificamos os elementos separadamente antes
+        //particao e depois da particao
         quickSort(arr, low, pi - 1);
         quickSort(arr, pi + 1, high);
     }
 }
 
-void Graph::showVet(minhaAresta array[], int k)
+void Graph::showVet(myEdge array[], int k)
 {
-    cout<< "Lista:";
-    for(int i=0; i<k; i++)
+    cout << "Lista:";
+    for (int i = 0; i < k; i++)
     {
-        cout << "( " <<array[i].origem << ", " ;
-        cout<< array[i].destino << " ," ;
-        cout<< array[i].peso << " )" ;
+        cout << "( " << array[i].origin << ", ";
+        cout << array[i].destiny << " ,";
+        cout << array[i].weight << " )";
     }
 
 }
 
-void Graph::imprimeKruskal(ofstream &arquivo_saida, minhaAresta solucao[], int numSolucao, int Ordem)
+void Graph::printKruskal(ofstream &output_file, myEdge solution[], int numberSolution, int Ordem)
 {
-    cout << "imprime solucao" << endl;
-    int somatorioPesos = 0;
-    arquivo_saida << "---------AGM KRUSKAL---------" << endl;
-    arquivo_saida << "[No_Origem -- No_Destino] - Peso" << endl;
-    arquivo_saida << "-----------------------------" << endl;
-    arquivo_saida << "Ordem:" << Ordem << endl;
-    for (int i = 0; i < numSolucao; i++)
+    cout << "-------------------------------" << endl;
+    int summationWeights = 0;
+    cout << "---------AGM KRUSKAL---------" << endl;
+    cout << "[No_origem -- No_destino] - Peso" << endl;
+    cout << "-----------------------------" << endl;
+    cout << "Ordem:" << Ordem << endl;
+    for (int i = 0; i < numberSolution; i++)
     {
-        arquivo_saida << "[" << solucao[i].origem << "-> " << solucao[i].destino << "] - " << solucao[i].peso << endl;
+        cout << "[" << solution[i].origin << "-> " << solution[i].destiny << "] - " << solution[i].weight << endl;
 
-        somatorioPesos += solucao[i].peso;
+        summationWeights += solution[i].weight;
     }
-    arquivo_saida << "Somatorio dos Pesos: " << somatorioPesos << endl;
-    arquivo_saida << "Quantidade de arestas: " << numSolucao << endl;
-    arquivo_saida << "--------------------------------------------------------------------------------------------------------" << endl
-                  << endl;
+    cout << "Somatorio dos peso: " << summationWeights << endl;
+    cout << "Quantidade de arestas: " << numberSolution << endl;
+    cout << "--------------------------------------------------------------------------------------------------------" << endl
+         << endl;
+
+    //Saida dot
+    output_file << "graph {" << endl;
+    for (int i = 0; i < numberSolution; i++)
+    {
+        output_file << "  " << solution[i].origin << " -- " << solution[i].destiny;
+        output_file << " [label = " << solution[i].weight << "]" << endl;
+    }
+    output_file << "}" << endl;
+    cout << "Impressao Finalizada!" << endl;
 }
 
 /**
- * árvore geradora mínima gerado pelo algoritmo de Kruskal
- * @param subgrafo Subgrafo induzido com subconjunto X de vertices
- * @param arquivo_saida arquivo de saida de dados
+ * Arvore geradora minima gerado pelo algoritmo de Kruskal
+ * @param subgraph subgraph induzido com subconjunto X de vertices
+ * @param output_file arquivo de saida de dados
  */
-void Graph::AGMKruskal(Graph *subgrafo, ofstream &arquivo_saida)
+void Graph::AGMKruskal(Graph *subgraph, ofstream &output_file)
 {
 
     //Numero de Arestas
-    int numArestas = subgrafo->getNumberEdges();
+    int numberEdges = subgraph->getNumberEdges();
 
     //Numero de Nos
-    int V = subgrafo->getOrder();
+    int V = subgraph->getOrder();
 
     //Criar uma lista L com as arestas
-    minhaAresta *lista_arestas = new minhaAresta[numArestas];
-
-    //Vetor com id dos Vertices
-    int vetoridNos[V];
-
-    //Vetor aux com subarvores de um no
-    int subarvores[V];
+    myEdge *list_edges = new myEdge[numberEdges];
 
     //Ponteiro para andar entre os nos
-    Node *p = subgrafo->getFirstNode();
+    Node *p = subgraph->getFirstNode();
 
     //Ponteiro para andar entre as arestas
     Edge *a = p->getFirstEdge();
 
-    //variavel auxiliar para armazenar peso
-    int auxPeso;
+    //variavel auxiliar para armazenar weight
+    int auxweight;
 
+    //contador
     int i = 0;
 
     //percorre o this induzido preenchendo as informações das arestas
 
-    //Percorre no subgrafo
+    //Percorre no subgraph
     while (p != nullptr)
     {
         a = p->getFirstEdge();
@@ -502,209 +618,173 @@ void Graph::AGMKruskal(Graph *subgrafo, ofstream &arquivo_saida)
         while (a != nullptr)
         {
             //verifica se no ja foi visitado
-            if (!verificaNo(lista_arestas, p->getId(), a->getTargetId(), i))
+            if (!checkNode(list_edges, p->getId(), a->getTargetId(), i))
             {
-                lista_arestas[i].origem = p->getId();
-                lista_arestas[i].destino = a->getTargetId();
-                lista_arestas[i].peso = a->getWeight();
+                list_edges[i].origin = p->getId();
+                list_edges[i].destiny = a->getTargetId();
+                list_edges[i].weight = a->getWeight();
                 i++;
             }
             a = a->getNextEdge();
         }
         p = p->getNextNode();
     }
-    //showVet(lista_arestas, numArestas);
+    //showVet(list_edges, numberEdges);
 
-    //ordenar em ordem crescente de pesos.
+    //ordenar em ordem crescente de weights.
     //Algoritmo de quicksorte escolhido
 
-    quickSort(lista_arestas, 0, numArestas - 1);
+    quickSort(list_edges, 0, numberEdges - 1);
 
-    //showVet(lista_arestas, numArestas);
+    //showVet(list_edges, numberEdges);
 
-    //vetor com as arestas da solucao
-    minhaAresta *solucao = new minhaAresta[numArestas];
+    //vetor com as arestas da solution
+    myEdge *solution = new myEdge[numberEdges];
 
-    //pecorre toda a lista de arestas colocando cada uma no grafo para verificação de ciclos
-    //caso o grafo possua ciclo, a aresta eh removida e nao sera colocada na solução
+    //contador de numero de arestas na solution
+    int numberSolution = 0;
 
-    //contador de numero de arestas na solucao
-    int numSolucao = 0;
-
-    //indice para solucao
-    int atual = 0;
+    //indice para solution
+    int current = 0;
 
     //vetor com tamanho de Arestas
-    int arvore[numArestas];
+    int tree[numberEdges];
 
-    //inicia o vetor arvore de 0 a numArestas
-    for (int i = 0; i < numArestas; i++)
+    //inicia o vetor tree de 0 a numberEdges
+    for (int i = 0; i < numberEdges; i++)
     {
-        arvore[i] = i;
+        tree[i] = i;
     }
 
-    //percorre as arestas adicionando-as no vetor arvore e na solução
+    //percorre as arestas adicionando-as no vetor tree e na solucao
     int c = 0;
-    while (c < numArestas)
+    while (c < numberEdges)
     {
-        int u = lista_arestas[c].origem;
-        int v = lista_arestas[c].destino;
+        int u = list_edges[c].origin;
+        int v = list_edges[c].destiny;
 
-        if (arvore[u] != arvore[v])
+        if (tree[u] != tree[v])
         {
-            solucao[atual] = lista_arestas[c];
-            atual++;
-            numSolucao++;
-            int verticeantigo = arvore[u];
-            int verticenovo = arvore[v];
-            for (int j = 0; j < numArestas; j++)
+            //Coloca a aresta na solucao
+            solution[current] = list_edges[c];
+
+            //Incrementa indice de solution e numberSolution
+            current++;
+            numberSolution++;
+
+            //O vertice antigo recebe a origem
+            int oldvertex = tree[u];
+            //O vertice novo recebe o destino
+            int newvertex = tree[v];
+
+            //Atualiza o vetor de "arvore" para o indice do vertice novo (id destino)
+            for (int j = 0; j < numberEdges; j++)
             {
-                if (arvore[j] == verticeantigo)
+                if (tree[j] == oldvertex)
                 {
-                    arvore[j] = verticenovo;
+                    tree[j] = newvertex;
                 }
             }
         }
         c++;
     }
-    cout<< "veio ate aqui" << endl;
-    //Imprime Solução
-    imprimeKruskal(arquivo_saida, solucao, numSolucao, subgrafo->getOrder());
+    //Imprime Solucao
+    printKruskal(output_file, solution, numberSolution, subgraph->getOrder());
 
     //desaloca
-    delete[] lista_arestas;
-    delete[] solucao;
-}
-Node *Graph::arestaMenorPeso()
-{
-    Node *p = this->getFirstNode();
-    Node *NoMenorPeso = nullptr;
-    Edge *a = p->getFirstEdge();
-
-    int auxpeso = 0;
-    int menorpeso = INT_MAX;
-
-    //Percorre Nos
-    while (p != nullptr)
-    {
-        //Percorre Arestas
-        while (a != nullptr)
-        {
-            auxpeso = a->getWeight();
-            if (auxpeso < menorpeso)
-            {
-                menorpeso = auxpeso;
-                NoMenorPeso = p;
-            }
-            a = a->getNextEdge();
-        }
-        p = p->getNextNode();
-    }
-    return NoMenorPeso;
+    delete[] list_edges;
+    delete[] solution;
 }
 
-int Graph::arestaPesoDoisNos(Node *n, Node *m)
+
+//so imprime o final
+void Graph::auxprintPrim(ofstream &output_file, int weight, int currentEdge)
 {
-    //se n=m retorna 0
-    if (n == m)
+    cout << "--------------------------------------------------------------------------------------------------------" << endl;
+    cout << "Peso Total: " << weight << endl;
+    cout << "Numero de arestas: " << currentEdge << endl;
+    cout << "--------------------------------------------------------------------------------------------------------" << endl
+         << endl;
+    output_file << "}" << endl;
+    cout << "Impressao Finalizada!" << endl;
+}
+void Graph::printPrim(ofstream &output_file, int previousvertex, int indice, int i, int min)
+{
+    //para imprimir apenas na 1a vez
+    if (i == 0)
     {
-        return 0;
-    }
-    //se sao adjacentes retorna peso aresta
-    Node *p = n->getNextNode();
-    while (p != nullptr)
-    {
-        if (p == m)
-        {
-            return p->getFirstEdge()->getWeight();
-        }
-        p = p->getNextNode();
+        cout << "---------AGM Prim---------" << endl;
+        cout << "No -- No  |  Peso" << endl;
+        cout << "--------------------------" << endl;
+        output_file << "graph {" << endl;
     }
 
-    //senao retorna INT_MAX
-    return INT_MAX;
+    cout << previousvertex << " -- " << indice << " | " << min << endl;
+
+    //Imprime dot
+    output_file << "  " << previousvertex << " -- " << indice;
+    output_file << " [label = " << min << "]" << endl;
 }
 
-//Uma função de utilidade para encontrar o vertice com
-//valor-chave mínimo, do conjunto de vértices
-//ainda não incluido na AGM
-int minKey(int key[], bool mstSet[], int tam)
+void Graph::AGMPrim(Graph *subgraph, ofstream &output_file)
 {
-    // Initialize min value
-    int min = INT_MAX, min_index;
 
-    for (int v = 0; v < tam; v++)
-        if (mstSet[v] == false && key[v] < min)
-            min = key[v], min_index = v;
-}
-
-//Graph *agmPrim()
-void Graph::agmPrim(ofstream &output_file)
-{
-    output_file << "---------AGM Prim---------" << endl;
-    output_file << "No -- No  |  Peso" << endl;
-    output_file << "--------------------------" << endl;
-
-    //guarda os nos com (ids) e os pesos
+    //guarda os nos com (ids) e os weights
     int **graph;
-    //guarda os menores custos
-    int *mincustos = new int[this->getOrder()];
-    //preenche com os vertices adjacentes
-    int *maisProximo = new int[this->getOrder()];
-    //para marcar os vertices visitados
-    bool *visitados = new bool[this->getOrder()];
 
+    //guarda os menores custos
+    int *mincost = new int[this->getOrder()];
+
+    //preenche com os vertices adjacentes
+    int *moreNext = new int[this->getOrder()];
+
+    //para marcar os vertices visitados
+    bool *visited = new bool[this->getOrder()];
+
+    //aloca a matriz
     graph = new int *[this->getOrder()];
 
-    //preenche a matriz de adjacências com o valor INT_MAX
+
+    //preenche a matriz graph e mincost com o valor INT_MAX
     for (int i = 0; i < this->getOrder(); i++)
     {
         graph[i] = new int[this->getOrder()];
+        mincost[i] = INT_MAX;
         for (int j = 0; j < this->getOrder(); j++)
         {
             graph[i][j] = INT_MAX;
         }
     }
 
-    //preenche a matriz de adjacências com o peso
-    //TODO: fazer debug aqui no for -> nao esta preenchedo a matriz com os pesos, corretamente
-    for (int i = 0; i < getOrder(); i++)
+
+    //preenche a matriz de adjacências com o peso do subgrafo
+    for (Node *p = subgraph->getFirstNode(); p != nullptr; p = p->getNextNode())
     {
-
-        for (Node *p = this->getFirstNode(); p != nullptr; p = p->getNextNode())
+        for (Edge *a = p->getFirstEdge(); a != nullptr; a = a->getNextEdge())
         {
-            for (Edge *a = p->getFirstEdge(); a != nullptr; a = a->getNextEdge())
-            {
-
-                cout << "a-> no destino:" << a->getTargetId() << endl;
-
-                graph[i][a->getTargetId()] = a->getWeight();
-                graph[a->getTargetId()][i] = a->getWeight();
-            }
-        }
-    }
-    cout<< "preenchi matriz graph" << endl;
-    for(int i = 0; i < getOrder(); i++)
-    {
-        for (int j = 0; j < getOrder(); j++)
-        {
-            cout << "Matriz:" << endl;
-            cout << "\t " << graph[i][j] << "\t ";
+            graph[p->getId()][a->getTargetId()] = a->getWeight();
+            graph[a->getTargetId()][p->getId()] = a->getWeight();
         }
     }
 
-    visitados[0] = true;
+    Node *firstnode = subgraph->getFirstNode();
+
+
     //preenche o vetor de menores custos com os menores custos da matriz de adjacências
-    for (int i = 1; i < this->getOrder(); i++)
+    for (int i = 0; i < this->getOrder(); i++)
     {
-        mincustos[i] = graph[0][i];
-        maisProximo[i] = 0;
-        visitados[i] = false;
+        mincost[i] = graph[firstnode->getId()][i];
+        moreNext[i] = firstnode->getId();
+        visited[i] = false;
     }
 
-    int peso = 0;
-    int atualArestas = 0;
-    int verticeAnterior = 0;
+    //marca o primeiro vertice como visitado
+    visited[firstnode->getId()] = true;
+
+    //variaveis auxiliares
+    int weight = 0;
+    int currentEdge = 0;
+    int previousvertex = firstnode->getId();
 
     //para o tamanho do grafo
     for (int i = 0; i < this->getOrder(); i++)
@@ -712,102 +792,146 @@ void Graph::agmPrim(ofstream &output_file)
         int min = INT_MAX;
         int indice = 1;
 
-        // percorre o vetor de menores custos atualizando-o de acordo com os nós já visitados
+        // percorre o vetor de menores custos currentizando-o de acordo com os nos ja visitados
         for (int j = 0; j < this->getOrder(); j++)
         {
-            if (mincustos[j] < min && !visitados[j])
+            if (mincost[j] < min && !visited[j])
             {
-                min = mincustos[j];
+                min = mincost[j];
                 indice = j;
             }
         }
 
-        //caso o indice seja 1 e o minimo sejá INT_MAX, break
+        //caso o indice seja 1 e o minimo sejá INT_MAX, nao salvo no contador de peso
         if (indice == 1 && min == INT_MAX)
         {
             break;
         }
         else
         {
-            peso += min;
+            weight += min;
         }
 
-        if (verticeAnterior == 0)
-        {
-            output_file << this->getOrder() << " -- " << indice << " | " << min << endl;
-        }
-        else if (indice == 0)
-        {
-            output_file << verticeAnterior << " -- " << this->getOrder() << " | " << min << endl;
-        }
-        else
-        {
-            output_file << verticeAnterior << " -- " << indice << " | " << min << endl;
-        }
+        //Imprime vertice anterior indice e peso
+        printPrim(output_file, previousvertex, indice, i, min);
 
-        verticeAnterior = indice;
-        visitados[indice] = true;
-        atualArestas++;
-        for (int j = 1; j < this->getOrder(); j++)
+        //Atualiza os vertices
+        previousvertex = indice;
+        visited[indice] = true;
+        currentEdge++;
+
+        //Atualiza os custos e o proximo vertice
+        for (int j = 0; j < this->getOrder(); j++)
         {
 
-            if ((graph[indice][j] < mincustos[j]) && (!visitados[j]))
+            if ((graph[indice][j] < mincost[j]) && (!visited[j]))
             {
-                //mincustos representa o peso minimo requerido para ir de um ponto a outro em uma árvore
-                mincustos[j] = graph[indice][j];
-                maisProximo[j] = indice;
+                //mincost representa o peso minimo requerido para ir de um ponto a outro em uma "arvore"
+                mincost[j] = graph[indice][j];
+                moreNext[j] = indice;
             }
         }
     }
 
-    output_file << "--------------------------------------------------------------------------------------------------------" << endl;
-    output_file << "Peso Total: " << peso << endl;
-    output_file << "Numero de arestas: " << atualArestas << endl;
-    output_file << "--------------------------------------------------------------------------------------------------------" << endl
-                << endl;
+    auxprintPrim(output_file, weight, currentEdge);
+
+    //Desalocacao
     for (int i = 0; i < this->getOrder(); i++)
     {
         delete[] graph[i];
     }
     delete[] graph;
+    delete[] mincost;
+    delete[] moreNext;
+    delete[] visited;
 }
 
-void Graph::profundidade(ofstream &arquivo_saida, int id, list<minhaAresta> &arestasArvore, list<minhaAresta> &arestasRetorno){
+//Caminhamento em Profundidade
+void Graph::depth(ofstream &output_file, int id){
+    //Listas de arestas da arvore e de retorno
+    list<myEdge> treeEdge, returnEdge;
 
-    list<int> visitado;
-    //Graph *arvore_profundidade = new Graph(this->getOrder(),false, false, false);
-    profundidadeRecursiva(id, arestasArvore, arestasRetorno, visitado);
-    geraSaidaProfundidade(arquivo_saida, arestasArvore, arestasRetorno);
-}
+    //Tempo de descoberta do vertice
+    int *timeFind = new int[this->getOrder()];
+    //Tempo de finalizacao da descoberta de todos os vertices adjacentes
+    int *timeFinish = new int[this->getOrder()];
+    //Inicializacao do tempo
+    int time = 0;
+    //Vetor que guarda o pai de cada vertice na arvore
+    int *father = new int[this->getOrder()];
 
-void Graph::geraSaidaProfundidade(ofstream &arquivo_saida, list<minhaAresta> arestasArvore, list<minhaAresta> arestasRetorno){
-    arquivo_saida.clear();
-    arquivo_saida << "graph {" << endl;
-    list<minhaAresta>::iterator it;
-    for(it = arestasArvore.begin(); it != arestasArvore.end(); it++){
-        arquivo_saida << (*it).origem << "--"<< (*it).destino << endl;
+    //Inicializacao dos vetores
+    for(int i = 0; i < this->getOrder(); i++){
+        timeFind[i] = 0;
+        timeFinish[i] = 0;
+        father[i] = -1;
     }
-    for(it = arestasRetorno.begin(); it != arestasRetorno.end(); it++){
-        arquivo_saida << (*it).origem << "--"<< (*it).destino <<  "[style=dotted]" << endl;
+
+    //Chamada da funcao depht recursiva
+    depthRecursive(id, treeEdge, returnEdge, father, time, timeFind, timeFinish);
+    //Chamada da funcao depth que gera a saida .dot
+    outputdepth(output_file, treeEdge, returnEdge);
+
+    list<myEdge>::iterator it;
+    cout << "Arestas da arvore: " << endl;
+    for(it = treeEdge.begin(); it != treeEdge.end(); it++){
+        cout << "(" << (*it).origin << ","<< (*it).destiny << ")" << endl;
     }
-    arquivo_saida << "}"<< endl;
+
+    delete[] timeFind;
+    delete[] timeFinish;
+    delete[] father;
 }
 
-void Graph::profundidadeRecursiva(int id, list<minhaAresta> &arestasArvore, list<minhaAresta> &arestasRetorno, list<int> &visitado){
-    for(Node *aux = this->getFirstNode();aux != nullptr; aux = aux->getNextNode()){
-        if(aux->getId() == id){
-            visitado.push_back(id);
-            for(Edge *adj = aux->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge()){
-                minhaAresta aresta = {id, adj->getTargetId(), 0};
-                if(find(visitado.begin(), visitado.end(), adj->getTargetId()) == visitado.end()){
-                    arestasArvore.push_back(aresta);
-                    profundidadeRecursiva(adj->getTargetId(), arestasArvore, arestasRetorno, visitado);
-                }
-                else{
-                    arestasRetorno.push_back(aresta);
-                }
+//Saida da Profundidade no formato .dot
+void Graph::outputdepth(ofstream &output_file, list<myEdge> treeEdge, list<myEdge> returnEdge){
+    //saida .dot
+    output_file.clear();
+
+    output_file << "graph {" << endl;
+
+    list<myEdge>::iterator it;
+
+    for(it = treeEdge.begin(); it != treeEdge.end(); it++){
+        output_file << (*it).origin << "--"<< (*it).destiny << endl;
+    }
+    for(it = returnEdge.begin(); it != returnEdge.end(); it++){
+        // A aresta de retorno tem o estilo pontilhado
+        output_file << (*it).origin << "--"<< (*it).destiny <<  "[style=dotted]" << endl;
+    }
+    output_file << "}"<< endl;
+}
+//Profundidade Recursivo
+void Graph::depthRecursive(int id, list<myEdge> &treeEdge, list<myEdge> &returnEdge, int *father, int time, int *timeFind, int *timeFinish){
+
+   time++;
+   timeFind[id] = time;
+
+    Node *node = getNode(id);
+
+    //Percorre a lista de adjacente do vertice
+    for(Edge *adj = node->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge()){
+        myEdge edge = {id, adj->getTargetId(), 0};
+
+        //Se o vertice nao foi descoberto
+        if(timeFind[adj->getTargetId()] == 0){
+            //Adiciona a aresta na arvore
+            treeEdge.push_back(edge);
+
+            //Define o vertice pai
+            father[adj->getTargetId()] = id;
+
+            //Chamada recursiva
+            depthRecursive(adj->getTargetId(), treeEdge, returnEdge, father, time, timeFind, timeFinish);
+        }
+        else{
+            //Se o vertice nao foi finalizado e o pai for diferente do vertice atual, adiciona aresta de retorno
+            if((timeFinish[adj->getTargetId()] == 0) && (father[id] != adj->getTargetId())){
+
+                returnEdge.push_back(edge);
             }
-            break;
         }
     }
+    //Define o tempo de finalizacao
+    timeFinish[id] = time;
 }
