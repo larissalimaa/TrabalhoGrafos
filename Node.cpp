@@ -124,7 +124,6 @@ void Node::setWeight(float weight){
 void Node::setVisited(bool v){
     this->visited = v;
 }
-
 // Other methods
 void Node::insertEdge(int target_id, float weight){
     // Verifies whether there are at least one edge in the node

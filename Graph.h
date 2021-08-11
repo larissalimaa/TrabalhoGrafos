@@ -49,6 +49,25 @@ class Graph{
 
         void outputdepth(ofstream &output_file, list<myEdge> treeEdge, list<myEdge> returnEdge);
 
+        void printFloyd(int **path, int **cost, int idOrig, int idDest, int directed, ofstream &output_file);
+
+        void printPathFloyd(int **path, int vertice1, int vertice2, ofstream &output_file);
+
+        void dotFloyd(int **path, int **cost, int idOrig, int idDest, int directed, ofstream &output_file);
+
+        void auxDotPathFloyd(int **path, int idOrig, int idDest, int directed, ofstream &output_file);
+
+        void auxDijkstra(float *dist, int *aPercorrer, int *Nonterior, int *map, int atual);
+
+        int mapeamento(int *map, int id);
+
+        void dotDijkstra(int *map, int *noAnterior, float *dist, int idOrig, int idDest, int directed, ofstream &output_file);
+
+        void auxPathDotDijkstra(int *map, int *noAnterior, float *dist, int idOrig, int idDest, int directed, ofstream &output_file);
+
+        void printDijkstra(int *map, int *noAnterior, float *dist, int idOrig, int idDest, int directed, ofstream &output_file);
+
+
     public:
 
         //Constructor
@@ -121,9 +140,9 @@ class Graph{
 
         float floydMarshall(int idSource, int idTarget);
 
-        float dijkstra(int idSource, int idTarget);
+        void floyd(int idOrig, int idDest, ofstream &output_file);
 
-        void showVet(myEdge array[], int k);
+        void dijkstra(int idOrig, int idDest, ofstream &output_file);
 
         void depth(ofstream &output_file, int id);
 };

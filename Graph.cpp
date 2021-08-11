@@ -12,10 +12,11 @@
 #include <float.h>
 #include <iomanip>
 #include <algorithm>
+#include <limits>
+
+#define INFINITO std::numeric_limits<int>::max()
 
 using namespace std;
-
-#define INT_MAX 10000000
 
 /**************************************************************************************************
  * Defining the Graph's methods
@@ -302,12 +303,14 @@ void Graph::directedTransitiveClosure(ofstream &output_file, int id){
 
     list<int>::iterator it;
 
-    cout << "Fecho Transitivo Direto: " << endl;
+    cout << "---------Fecho Transitivo Direto--------------" << endl;
+    cout << "----------------------------------------------" << endl;
 
     //Imprime o fecho transitivo direto na tela
     for(it = closureD.begin(); it != closureD.end(); it++){
-        cout << *it << endl;
+        cout << *it << " ";
     }
+    cout << endl << "----------------------------------------------" << endl;
 
     //saida .dot
     output_file << "graph {" << endl;
@@ -328,12 +331,14 @@ void Graph::indirectedTransitiveClosure(ofstream &output_file, int id){
 
     list<int>::iterator it;
 
-    cout << "Fecho Transitivo Indireto: " << endl;
+    cout << "---------Fecho Transitivo Indireto------------" << endl;
+    cout << "----------------------------------------------" << endl;
 
     //Imprime o fecho transitivo indireto na tela
     for(it = closureI.begin(); it != closureI.end(); it++){
-        cout << *it << endl;
+        cout << *it << " ";
     }
+    cout << endl << "----------------------------------------------" << endl;
 
     //saida .dot
     output_file << "graph {" << endl;
@@ -401,18 +406,20 @@ void Graph::topologicalSorting(ofstream &output_file)
     //Impressao da ordenacao topologica
     if(sorting.size() == this->getOrder()){
         list<int>::iterator it;
-        cout << "Ordenacao Topologica: " << endl;
+
+        cout << "---------Ordenacao Topologica-----------------" << endl;
+        cout << "----------------------------------------------" << endl;
+
         for(it = sorting.begin(); it != sorting.end(); it++){
-            cout << (*it) << endl;
+            cout << (*it) << " ";
         }
+        cout << endl <<"----------------------------------------------" << endl;
     }
     else{
         cout << "Nao e um grafo aciclico direcionado" << endl;
     }
-}
-
-void breadthFirstSearch(ofstream &output_file)
-{
+    getchar();
+    getchar();
 }
 // Funcao para gerar um subgraph Vertice Induzido
 Graph *Graph::getVertInduz()
@@ -460,21 +467,9 @@ Graph *Graph::getVertInduz()
     cout << "\nO subgraph X feito com sucesso! ";
     cout << "(Ordem = " << subgraph->getOrder() << " e Numero de Arestas = " << subgraph->getNumberEdges() << ")" << endl;
 
-    //int escolha;
-    //cout<< "Gostaria de imprimir o subgrafo?" << endl;
-    //cout << "(1) para Sim; (0) para Nao;" << endl;
-    //cout<< "Opcao: ";
-    //cin >> escolha;
-
-    //if(escolha == 1)
-    //{
-        //subgraph->printGraph();
-    //}
-
     return subgraph;
 }
 
-//FIXME: Larissa comentar
 bool checkNode(myEdge nos_visited[], int id_node, int id_destiny, int size)
 {
     for (int i = 0; i < size; i++)
@@ -537,25 +532,13 @@ void quickSort(myEdge arr[], int low, int high)
     }
 }
 
-void Graph::showVet(myEdge array[], int k)
-{
-    cout << "Lista:";
-    for (int i = 0; i < k; i++)
-    {
-        cout << "( " << array[i].origin << ", ";
-        cout << array[i].destiny << " ,";
-        cout << array[i].weight << " )";
-    }
-
-}
-
 void Graph::printKruskal(ofstream &output_file, myEdge solution[], int numberSolution, int Ordem)
 {
     cout << "-------------------------------" << endl;
     int summationWeights = 0;
-    cout << "---------AGM KRUSKAL---------" << endl;
+    cout << "---------AGM KRUSKAL-----------" << endl;
     cout << "[No_origem -- No_destino] - Peso" << endl;
-    cout << "-----------------------------" << endl;
+    cout << "-------------------------------" << endl;
     cout << "Ordem:" << Ordem << endl;
     for (int i = 0; i < numberSolution; i++)
     {
@@ -565,8 +548,7 @@ void Graph::printKruskal(ofstream &output_file, myEdge solution[], int numberSol
     }
     cout << "Somatorio dos peso: " << summationWeights << endl;
     cout << "Quantidade de arestas: " << numberSolution << endl;
-    cout << "--------------------------------------------------------------------------------------------------------" << endl
-         << endl;
+    cout << "-------------------------------" << endl;
 
     //Saida dot
     output_file << "graph {" << endl;
@@ -629,14 +611,8 @@ void Graph::AGMKruskal(Graph *subgraph, ofstream &output_file)
         }
         p = p->getNextNode();
     }
-    //showVet(list_edges, numberEdges);
-
-    //ordenar em ordem crescente de weights.
-    //Algoritmo de quicksorte escolhido
 
     quickSort(list_edges, 0, numberEdges - 1);
-
-    //showVet(list_edges, numberEdges);
 
     //vetor com as arestas da solution
     myEdge *solution = new myEdge[numberEdges];
@@ -694,17 +670,20 @@ void Graph::AGMKruskal(Graph *subgraph, ofstream &output_file)
     //desaloca
     delete[] list_edges;
     delete[] solution;
+
+    getchar();
+    getchar();
 }
 
 
 //so imprime o final
 void Graph::auxprintPrim(ofstream &output_file, int weight, int currentEdge)
 {
-    cout << "--------------------------------------------------------------------------------------------------------" << endl;
+    cout << "--------------------------" << endl;
     cout << "Peso Total: " << weight << endl;
     cout << "Numero de arestas: " << currentEdge << endl;
-    cout << "--------------------------------------------------------------------------------------------------------" << endl
-         << endl;
+    cout << "--------------------------" << endl;
+
     output_file << "}" << endl;
     cout << "Impressao Finalizada!" << endl;
 }
@@ -745,14 +724,14 @@ void Graph::AGMPrim(Graph *subgraph, ofstream &output_file)
     graph = new int *[this->getOrder()];
 
 
-    //preenche a matriz graph e mincost com o valor INT_MAX
+    //preenche a matriz graph e mincost com o valor INFINITO
     for (int i = 0; i < this->getOrder(); i++)
     {
         graph[i] = new int[this->getOrder()];
-        mincost[i] = INT_MAX;
+        mincost[i] = INFINITO;
         for (int j = 0; j < this->getOrder(); j++)
         {
-            graph[i][j] = INT_MAX;
+            graph[i][j] = INFINITO;
         }
     }
 
@@ -789,7 +768,7 @@ void Graph::AGMPrim(Graph *subgraph, ofstream &output_file)
     //para o tamanho do grafo
     for (int i = 0; i < this->getOrder(); i++)
     {
-        int min = INT_MAX;
+        int min = INFINITO;
         int indice = 1;
 
         // percorre o vetor de menores custos currentizando-o de acordo com os nos ja visitados
@@ -802,8 +781,8 @@ void Graph::AGMPrim(Graph *subgraph, ofstream &output_file)
             }
         }
 
-        //caso o indice seja 1 e o minimo sejá INT_MAX, nao salvo no contador de peso
-        if (indice == 1 && min == INT_MAX)
+        //caso o indice seja 1 e o minimo sejá INFINITO, nao salvo no contador de peso
+        if (indice == 1 && min == INFINITO)
         {
             break;
         }
@@ -844,6 +823,9 @@ void Graph::AGMPrim(Graph *subgraph, ofstream &output_file)
     delete[] mincost;
     delete[] moreNext;
     delete[] visited;
+
+    getchar();
+    getchar();
 }
 
 //Caminhamento em Profundidade
@@ -872,15 +854,26 @@ void Graph::depth(ofstream &output_file, int id){
     //Chamada da funcao depth que gera a saida .dot
     outputdepth(output_file, treeEdge, returnEdge);
 
+    cout << "---------Caminhamento em Profundidade---------" << endl;
+    cout << "----------------------------------------------" << endl;
+
     list<myEdge>::iterator it;
-    cout << "Arestas da arvore: " << endl;
+    cout << "Arestas da Arvore: " << endl;
     for(it = treeEdge.begin(); it != treeEdge.end(); it++){
-        cout << "(" << (*it).origin << ","<< (*it).destiny << ")" << endl;
+        cout << "[" << (*it).origin << " -- "<< (*it).destiny << "]" << endl;
     }
+    cout << "Arestas de Retorno: " << endl;
+    for(it = returnEdge.begin(); it != returnEdge.end(); it++){
+        cout << "[" << (*it).origin << " -- "<< (*it).destiny << "]" << endl;
+    }
+    cout << "----------------------------------------------" << endl;
 
     delete[] timeFind;
     delete[] timeFinish;
     delete[] father;
+
+    getchar();
+    getchar();
 }
 
 //Saida da Profundidade no formato .dot
@@ -935,3 +928,517 @@ void Graph::depthRecursive(int id, list<myEdge> &treeEdge, list<myEdge> &returnE
     //Define o tempo de finalizacao
     timeFinish[id] = time;
 }
+//Algoritmo de Floyd
+
+void Graph::floyd(int idOrig, int idDest, ofstream &output_file)
+{ //
+    // cost[] e matrizAdjac[] armazenam o menor caminho
+    int **cost, **path;
+    int **matrizAdjac;
+    path = new int *[this->getOrder()];
+    cost = new int *[this->getOrder()];
+    matrizAdjac = new int *[this->getOrder()];
+
+    //inicializa as matrizes
+    for (int i = 0; i < this->getOrder(); i++)
+    {
+        path[i] = new int[this->getOrder()];
+        cost[i] = new int[this->getOrder()];
+        matrizAdjac[i] = new int[this->getOrder()];
+        for (int j = 0; j < this->getOrder(); j++)
+        {
+            matrizAdjac[i][j] = INFINITO;
+            if (i == j)
+            {
+                matrizAdjac[i][j] = 0;
+            }
+        }
+    }
+
+    Node *n = this->getFirstNode();
+    Edge *e;
+    while (n != nullptr)
+        {
+            e = n->getFirstEdge();
+
+            while (e != nullptr)
+            {
+                    matrizAdjac[n->getId()][e->getTargetId()] = e->getWeight();
+
+                e = e->getNextEdge();
+            }
+            n = n->getNextNode();
+        }
+
+    // Preenche cost[] e path[]
+    for (int v = 0; v < this->getOrder(); v++)
+    {
+        for (int u = 0; u < this->getOrder(); u++)
+        {
+            // inicialmente o cost sera igual ao peso da aresta
+            cost[v][u] = matrizAdjac[v][u];
+            if (v == u)
+                path[v][u] = 0;
+            else if (cost[v][u] != INFINITO)
+                path[v][u] = v;
+            else
+                path[v][u] = -1;
+        }
+    }
+
+    //algoritmo de Floyd
+    //como a complexidade deste algoritmo é O(n^3), para instancias muito grandes ele demora a executar
+    for (int k = 0; k < this->getOrder(); k++)
+    {
+        for (int v = 0; v < this->getOrder(); v++)
+        {
+            for (int u = 0; u < this->getOrder(); u++)
+            {
+                // caso o vertice k esteja no menor path de v para u, então o valor da posição cost[v][u] é atualizado
+                if (cost[v][k] != INFINITO && cost[k][u] != INFINITO && cost[v][k] + cost[k][u] < cost[v][u])
+                {
+                    cost[v][u] = cost[v][k] + cost[k][u];
+                    path[v][u] = path[k][u];
+                }
+            }
+
+            // se os elementos da diagonal se tornam negativos, o grafo atua em um ciclo de peso negativo
+            if (cost[v][v] < 0)
+            {
+                cout << "** Ciclo de peso negativo!! **"<<endl;
+                return;
+            }
+        }
+    }
+
+    //Plotando o grafo no .dot
+    dotFloyd(path, cost, idOrig, idDest, directed, output_file);
+
+    //Resultado em tela
+    printFloyd(path, cost, idOrig, idDest, directed, output_file);
+
+    for (int i = 0; i < this->getOrder(); i++)
+    {
+        delete[] path[i];
+        delete[] cost[i];
+        delete[] matrizAdjac[i];
+    }
+    delete[] path;
+    delete[] cost;
+    delete[] matrizAdjac;
+    cout << "-------------------------------------------------------------------" << endl;
+
+    getchar();
+    getchar();
+}
+
+//Função para imprimir em tela o resultado
+
+void Graph::printFloyd(int **path, int **cost, int idOrig, int idDest, int directed, ofstream &output_file)
+{
+    cout << "-------------------------------FLOYD-------------------------------" << endl;
+    cout << "[caminho minimo entre os nos " << idOrig << " e " << idDest << " ]" << " - custo do caminho minimo" << endl;
+    cout << "-------------------------------------------------------------------" << endl;
+
+    if(cost[idOrig][idDest]==INFINITO){
+        cout<< "[ "<<idOrig << ", "<< idDest<<"]"<< " - " <<"Nao existe caminho"<<endl;
+    }
+    else if(idOrig == idDest)
+    {
+        cout<< "[ " << idOrig << ", "<<idDest<< "] "<< " - "<< "0"<< endl;
+    }
+    else{
+        cout << "[" << idOrig << ", ";
+        printPathFloyd(path, idOrig, idDest, output_file);
+        cout << idDest << "] - ";
+        cout<< cost[idOrig][idDest] << endl;
+    }
+}
+
+
+//Auxiliar para imprimir caminho minimo no algoritimo de Floyd
+
+void Graph::printPathFloyd(int **path, int idOrig, int idDest, ofstream &output_file)
+{
+        if (path[idOrig][idDest] == idOrig)
+        return;
+
+        printPathFloyd(path, idOrig, path[idOrig][idDest], output_file);
+        cout << path[idOrig][idDest] << ", ";
+
+}
+
+//Funcao para montar o arquivo .dot no algoritimo de Floyd
+
+void Graph::dotFloyd(int **path, int **cost, int idOrig, int idDest, int directed, ofstream &output_file)
+{
+    Node *n = this->getFirstNode();
+    Edge *e;
+
+    if (directed==1)
+    {
+        output_file << "strict digraph {" << endl;
+
+        while (n != nullptr)
+        {
+            e = n->getFirstEdge();
+
+            while (e != nullptr)
+            {
+                output_file << n->getId() <<"->";
+                output_file << e->getTargetId() <<" [";
+                output_file << "label=" << e->getWeight() <<"];"<<endl;
+
+                e = e->getNextEdge();
+            }
+            n = n->getNextNode();
+        }
+
+        if(cost[idOrig][idDest]==INFINITO){
+            output_file <<"}";
+        }
+        else if(idOrig == idDest){
+            output_file << idOrig <<" [color=red];"<<endl;
+            output_file <<"}";
+        }
+        else{
+            output_file << idOrig << "->";
+            auxDotPathFloyd(path, idOrig, idDest, directed, output_file);
+            output_file << idDest << " [color=red];"<<endl;
+            output_file <<"}";
+        }
+
+    }
+
+    else
+    {
+    output_file << "strict graph {" << endl;
+
+        while (n != nullptr)
+        {
+            e = n->getFirstEdge();
+
+            while (e != nullptr)
+            {
+                output_file << n->getId() <<"--";
+                output_file << e->getTargetId() <<" [";
+                output_file << "label=" << e->getWeight() <<"];"<<endl;
+
+                e = e->getNextEdge();
+            }
+            n = n->getNextNode();
+        }
+
+        if(cost[idOrig][idDest]==INFINITO){
+            output_file <<"}";
+        }
+        else if(idOrig == idDest){ //(cost[idOrig][idDest]==0)
+            output_file << idOrig <<" [color=red];"<<endl;
+            output_file <<"}";
+        }
+        else{
+            output_file << idOrig << "--";
+            auxDotPathFloyd(path, idOrig, idDest, directed, output_file);
+            output_file << idDest << " [color=red];"<<endl;
+            output_file <<"}";
+        }
+
+    }
+
+}
+
+//Auxiliar para plotar o path minimo no arquivo.dot de Floyd
+
+void Graph::auxDotPathFloyd(int **path, int idOrig, int idDest, int directed, ofstream &output_file)
+{
+    if(directed==1)
+    {
+        if (path[idOrig][idDest] == idOrig)
+        return;
+
+        auxDotPathFloyd(path, idOrig, path[idOrig][idDest], directed, output_file);
+        output_file << path[idOrig][idDest] << "->";
+    }
+    else
+    {
+        if (path[idOrig][idDest] == idOrig)
+        return;
+
+        auxDotPathFloyd(path, idOrig, path[idOrig][idDest], directed, output_file);
+        output_file << path[idOrig][idDest] << "--";
+    }
+
+}
+
+
+//Algoritmo de Dijkstra
+
+void Graph::dijkstra(int idOrig, int idDest, ofstream &output_file)
+{
+    float *dist = new float[this->getOrder()];
+    int *map = new int[this->getOrder()];
+    int *aPercorrer = new int[this->getOrder()];
+    int *noAnterior = new int[this->getOrder()];
+
+    //preenche os vetores map, a dist e aPercorrer com os valores 0, 1 ou -1
+    for (int i = 0; i < this->getOrder(); i++)
+    {
+        map[i] = i;
+        if (i == idOrig)
+        {
+            dist[i] = 0;
+            aPercorrer[i] = 0;
+        }
+        else
+        {
+            dist[i] = -1;
+            aPercorrer[i] = 1;
+        }
+        noAnterior[i] = -1;
+    }
+
+    auxDijkstra(dist, aPercorrer, noAnterior, map, idOrig);
+
+    dotDijkstra(map, noAnterior, dist, idOrig, idDest, directed, output_file);
+
+    printDijkstra(map, noAnterior, dist, idOrig, idDest, directed, output_file);
+
+    delete[] aPercorrer;
+    delete[] noAnterior;
+    delete[] dist;
+    delete[] map;
+
+    getchar();
+    getchar();
+}
+
+//Auxiliar para o algoritmo de Dijkstra
+
+void Graph::auxDijkstra(float *dist, int *aPercorrer, int *noAnterior, int *map, int atual)
+{
+    int indiceAtual = mapeamento(map, atual);
+    int indiceAresta;
+    Edge *adj;
+    Node *aux = this->getFirstNode();
+
+    //enquanto a aresta não é nula preenche os vetores de distância e noAnterior
+    while (aux != nullptr)
+    {
+        if(atual == aux->getId())
+        {
+            while (aux != nullptr)
+            {
+                adj = aux->getFirstEdge();
+                while(adj != nullptr)
+                {
+                    indiceAresta = mapeamento(map, adj->getTargetId());
+                    //caso o indicie atual da aresta não seja -1
+                    if (dist[indiceAresta] != -1)
+                    {
+                        if (dist[indiceAresta] > dist[indiceAtual] + adj->getWeight())
+                        {
+                            dist[indiceAresta] = dist[indiceAtual] + adj->getWeight();
+                            noAnterior[indiceAresta] = atual;
+                        }
+                    }
+                     else
+                    {
+                        dist[indiceAresta] = dist[indiceAtual] + adj->getWeight();
+                        noAnterior[indiceAresta] = atual;
+                    }
+                    adj = adj->getNextEdge();
+                }
+                aux = nullptr;
+            }
+        }
+        else{
+            aux = aux->getNextNode();
+            }
+    }
+    int menor = -1;
+    //percorre o vetor de nós aPercorrer
+    for (int i = 0; i < this->getOrder() && menor == -1; i++)
+    {
+        if (aPercorrer[i])
+        {
+            if (dist[i] != -1)
+            {
+                menor = dist[i];
+                atual = map[i];
+            }
+        }
+    }
+    if (menor != -1)
+    {
+        for (int i = 0; i < this->getOrder(); i++)
+        {
+            if (aPercorrer[i])
+                if (dist[i] != -1)
+                    if (dist[i] < menor)
+                    {
+                        menor = dist[i];
+                        atual = map[i];
+                    }
+        }
+        aPercorrer[indiceAtual] = 0;
+        auxDijkstra(dist, aPercorrer, noAnterior, map, atual);
+    }
+}
+
+//mapeia as arestas de retorno para o algoritmo de busca
+
+int Graph::mapeamento(int *map, int id)
+{
+    for (int i = 0; i < this->getOrder(); i++)
+    {
+        if (map[i] == id)
+            return i;
+    }
+    return -1;
+}
+
+//Funcao que monta o arquivo .dot do algoritimo de Dijkstra
+
+void Graph::dotDijkstra(int *map, int *noAnterior, float *dist, int idOrig, int idDest, int directed, ofstream &output_file)
+{
+    Node *n = this->getFirstNode();
+    Edge *e;
+
+    if (directed==1)
+    {
+        output_file << "strict digraph {" << endl;
+
+        while (n != nullptr)
+        {
+            e = n->getFirstEdge();
+
+            while (e != nullptr)
+            {
+                output_file << n->getId() <<"->";
+                output_file << e->getTargetId() <<" [";
+                output_file << "label=" << e->getWeight() <<"];"<<endl;
+
+                e = e->getNextEdge();
+            }
+            n = n->getNextNode();
+        }
+
+        auxPathDotDijkstra(map, noAnterior, dist, idOrig, idDest, directed, output_file);
+        output_file <<"}";
+
+    }
+
+    else
+    {
+        output_file << "strict graph {" << endl;
+
+        while (n != nullptr)
+        {
+            e = n->getFirstEdge();
+
+            while (e != nullptr)
+            {
+                output_file << n->getId() <<"--";
+                output_file << e->getTargetId() <<" [";
+                output_file << "label=" << e->getWeight() <<"];"<<endl;
+
+                e = e->getNextEdge();
+            }
+            n = n->getNextNode();
+        }
+
+        auxPathDotDijkstra(map, noAnterior, dist, idOrig, idDest, directed, output_file);
+        output_file <<"}";
+    }
+
+}
+
+void Graph::auxPathDotDijkstra(int *map, int *noAnterior, float *dist, int idOrig, int idDest, int directed, ofstream &output_file)
+{
+ if (dist[mapeamento(map, idDest)] != -1)
+    {
+        int *guarda = new int[this->getOrder()];
+        int i=0;
+        guarda[i]=idDest;
+        i++;
+
+        int path = noAnterior[mapeamento(map, idDest)];
+        //percorre o vetor de nós a percorrer até que encontre uma posição igual a -1
+        while (path != -1)
+        {
+            guarda[i]=path;
+
+            path = noAnterior[mapeamento(map, path)];
+            i++;
+        }
+        i--;
+
+        while(i>=0)
+        {
+            if(directed==1){
+                if(i!=0){
+                    output_file << guarda[i]<<"->";
+                }
+                else{
+                    output_file << guarda[i];
+                }
+            }
+            else{
+                if(i!=0){
+                    output_file << guarda[i]<<"--";
+                }
+                else{
+                    output_file << guarda[i];
+                }
+            }
+            i--;
+        }
+        output_file << " [color=red]; "<< endl;
+    }
+}
+
+void Graph::printDijkstra(int *map, int *noAnterior, float *dist, int idOrig, int idDest, int directed, ofstream &output_file)
+{
+    cout << "------------------------------DIJKSTRA------------------------------" << endl;
+
+    cout << "[caminho minimo entre os nos " << idOrig << " e " << idDest << " ]" << " - custo do caminho minimo" << endl;
+
+    cout << "--------------------------------------------------------------------" << endl;
+
+    if (dist[mapeamento(map, idDest)] != -1)
+    {
+        int *guarda = new int[this->getOrder()];
+        int i=0;
+        guarda[i]=idDest;
+        i++;
+
+        int path = noAnterior[mapeamento(map, idDest)];
+        //percorre o vetor de nós a percorrer até que encontre uma posição igual a -1
+        while (path != -1)
+        {
+            guarda[i]=path;
+
+            path = noAnterior[mapeamento(map, path)];
+            i++;
+        }
+        i--;
+        cout << "[";
+        while(i>=0)
+        {
+            if(i!=0){
+                cout << guarda[i]<<", ";
+            }
+            else{
+                cout << guarda[i];
+            }
+            i--;
+        }
+        cout << "] - "<< dist[mapeamento(map, idDest)] << endl;
+    }
+    else
+    {
+        cout << "[" << idOrig << ", " << idDest << "] - -1 Nao ha caminho";
+    }
+    cout << "--------------------------------------------------------------------" << endl;
+}
+

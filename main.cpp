@@ -102,8 +102,9 @@ int menu(){
 
     int selecao;
 
-    cout << "MENU" << endl;
-    cout << "----" << endl;
+    cout << "------------------------------------------------------" << endl;
+    cout << "-------------------------MENU-------------------------" << endl;
+    cout << "------------------------------------------------------" << endl;
     cout << "[1] Fecho Transitivo Direto" << endl;
     cout << "[2] Fecho Transitivo Indireto" << endl;
     cout << "[3] Caminho Mínimo entre dois vértices - Djkstra" << endl;
@@ -113,6 +114,7 @@ int menu(){
     cout << "[7] Imprimir caminhamento em Profundidade" << endl;
     cout << "[8] Imprimir Ordenacao Topológica" << endl;
     cout << "[0] Sair" << endl;
+    cout << "------------------------------------------------------" << endl;
 
     cout << "\nDigite a Opcao Desejada: ";
     cin >> selecao;
@@ -143,15 +145,40 @@ void selecionar(int selecao, Graph* graph, ofstream& output_file){
         }
 
             //Caminho Mínimo entre dois vértices - Djkstra;
-        case 3:{
+        case 3:
+        {
+            int idOrig, idDest;
+            cout << "Digite o id do no inicial: ";
+            cin >> idOrig;
+            cout << "Digite o id do no de destino: ";
+            cin >> idDest;
 
+                if (!(idOrig < 0 || idOrig >= graph->getOrder()) || !(idDest < 0 || idDest >= graph->getOrder()))
+                {
+                    graph->dijkstra(idOrig, idDest, output_file);
+                }
+                else
+                {
+                    cout << endl
+                        << "Id inexistente!" << endl;
+                }
             break;
         }
-
             //Caminho Mínimo entre dois vértices - Floyd;
         case 4:{
+            int idOrig, idDest;
+            cout << "Digite o id do no inicial: ";
+            cin >> idOrig;
+            cout << "Digite o id do no de destino: ";
+            cin >> idDest;
 
-
+            if (!(idOrig < 0 || idOrig >= graph->getOrder()) || !(idDest < 0 || idDest >= graph->getOrder()))
+            {
+                graph->floyd(idOrig, idDest, output_file);
+            }
+            else
+                cout << endl
+                     << "Id inexistente!" << endl;
             break;
         }
 
@@ -188,7 +215,9 @@ void selecionar(int selecao, Graph* graph, ofstream& output_file){
 
         default:
         {
-            cout << " Erro!!!Opcao Invalida!!!" << endl;
+            cout << "Erro!!!Opcao Invalida!!!" << endl;
+            getchar();
+            getchar();
         }
 
     }
@@ -219,8 +248,6 @@ int mainMenu(ofstream& output_file, Graph* graph){
     return 0;
 }
 
-
-
 int main(int argc, char const *argv[]) {
 
     //Verificação se todos os parâmetros do programa foram entrados
@@ -246,8 +273,6 @@ int main(int argc, char const *argv[]) {
     input_file.open(argv[1], ios::in);
     output_file.open(argv[2], ios::out | ios::trunc);
 
-
-
     Graph* graph;
 
     if(input_file.is_open()){
@@ -257,17 +282,7 @@ int main(int argc, char const *argv[]) {
     }else
         cout << "Unable to open " << argv[1];
 
-    //cout << "Impressao Grafo: " << endl;
-    //for(Node *aux = graph->getFirstNode();aux != nullptr; aux = aux->getNextNode()){
-        //cout << aux->getId();
-        //for(Edge *adj = aux->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge()){
-            //cout << " -  " << adj->getTargetId() << " (" << adj->getWeight() << ")";
-       // }
-        //cout << endl;
-    //}
     mainMenu(output_file, graph);
-
-
 
     //Fechando arquivo de entrada
     input_file.close();
